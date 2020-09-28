@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Stundenplan</string>
+    <string name="action_switch_theme">Switch Theme</string>
+    <string name="action_refresh">Refresh</string>
+</resources>
