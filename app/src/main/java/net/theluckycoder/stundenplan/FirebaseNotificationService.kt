@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
@@ -13,11 +12,13 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import kotlinx.coroutines.Dispatchers
+import com.google.firebase.remoteconfig.ktx.remoteConfig
 import kotlinx.coroutines.GlobalScope
-import kotlin.random.Random
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class FirebaseNotificationService : FirebaseMessagingService() {
 
@@ -31,27 +32,24 @@ class FirebaseNotificationService : FirebaseMessagingService() {
             val title = data["title"]!!
             val body = data["body"]!!
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 createNotificationChannel()
-            }
 
             sendNotification(title, body)
         }
     }
 
-    private fun getNotificationManager() = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel() {
-        val channel = NotificationChannel(CHANNEL, "Notifications", NotificationManager.IMPORTANCE_DEFAULT)
+        val channel = NotificationChannel(NOTIFICATION_CHANNEL, "Notifications", NotificationManager.IMPORTANCE_DEFAULT)
 
-        getNotificationManager().createNotificationChannel(channel)
+        NotificationManagerCompat.from(this).createNotificationChannel(channel)
     }
 
     private fun sendNotification(title: String, body: String) {
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val notification = NotificationCompat.Builder(this, CHANNEL)
+        val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
             .setContentTitle(title)
             .setContentText(body)
             .setSmallIcon(R.drawable.ic_notification)
@@ -61,6 +59,16 @@ class FirebaseNotificationService : FirebaseMessagingService() {
             .build()
 
         NotificationManagerCompat.from(this).notify(1, notification)
+
+        updateRemoteConfig()
+    }
+
+    private fun updateRemoteConfig() = GlobalScope.launch {
+        val remoteConfig = Firebase.remoteConfig
+        remoteConfig.fetch(1).await()
+        Log.d(TAG, "New Remote Config Fetched")
+        remoteConfig.activate().await()
+        Log.d(TAG, "New Remote Config Activated")
     }
 
     private fun getPendingIntent(): PendingIntent {
@@ -69,8 +77,10 @@ class FirebaseNotificationService : FirebaseMessagingService() {
         return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
-    private companion object {
-        const val TAG = "FirebaseNotifications"
-        const val CHANNEL = "notifications"
+    companion object {
+        private const val TAG = "FirebaseNotifications"
+        private const val NOTIFICATION_CHANNEL = "notifications"
+
+        const val NOTIFICATION_ID = 1
     }
 }

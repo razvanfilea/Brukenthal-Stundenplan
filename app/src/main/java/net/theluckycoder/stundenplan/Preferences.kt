@@ -21,7 +21,7 @@ class Preferences(context: Context) {
             isHighSchool = (value == TimetableType.HIGH_SCHOOL)
         }
 
-    private companion object {
+    companion object {
         private const val DARK_THEME = "dark_theme"
         private const val SCHOOL_TYPE = "is_high_school"
     }

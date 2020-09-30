@@ -34,9 +34,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val firebaseMessaging = FirebaseMessaging.getInstance()
-    private val stateLiveData = MutableLiveData<Result>()
     private val isDownloading = AtomicBoolean(false)
     private val preferences = Preferences(getApplication())
+
+    private val stateLiveData = MutableLiveData<Result>()
 
     init {
         val timetableType = preferences.timetableType

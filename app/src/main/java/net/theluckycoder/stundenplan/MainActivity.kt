@@ -7,6 +7,8 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.github.barteksc.pdfviewer.util.FitPolicy
@@ -58,10 +60,13 @@ class MainActivity : AppCompatActivity() {
                 }
                 is Result.Failed -> {
                     binding.progressBar.hide()
-                    Snackbar.make(binding.root, "Failed to download PDF", Snackbar.LENGTH_LONG).show()
+                    Snackbar.make(binding.root, R.string.download_failed, Snackbar.LENGTH_LONG).show()
                 }
             }
         }
+
+        // Cancel Active Notifications
+        NotificationManagerCompat.from(this).cancel(FirebaseNotificationService.NOTIFICATION_ID)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -90,7 +95,7 @@ class MainActivity : AppCompatActivity() {
             .enableSwipe(true)
             .swipeHorizontal(false)
             .enableDoubletap(true)
-            .onError { Snackbar.make(binding.root, "Error Displaying PDF", Snackbar.LENGTH_LONG).show() }
+            .onError { Snackbar.make(binding.root, R.string.error_displaying, Snackbar.LENGTH_LONG).show() }
             .enableAntialiasing(true)
             .pageFitPolicy(FitPolicy.WIDTH) // mode to fit pages in the view
             .nightMode(preferences.useDarkTheme)
