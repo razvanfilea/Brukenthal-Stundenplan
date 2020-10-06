@@ -1,7 +1,16 @@
 <resources>
-    <string name="app_name">Stundenplan</string>
+    <string name="app_name">Stundenthal</string>
+    <string name="activity_title">Brukenthal Timetable</string>
+
     <string name="action_switch_theme">Switch Theme</string>
     <string name="action_refresh">Refresh</string>
-    <string name="download_failed">Failed to download PDF</string>
-    <string name="error_displaying">Error Displaying PDF</string>
+    <string name="action_switch_to_high_school">Switch to High School</string>
+    <string name="action_switch_to_middle_school">Switch to Middle School</string>
+
+    <string name="error_network_connection">No internet connection</string>
+    <string name="error_download_failed">Failed to download Timetable</string>
+    <string name="error_rendering_failed">Could not display Timetable</string>
+
+    <string name="notifications_channel_title">Notifications</string>
+    <string name="new_timetable_notification">New Timetable!</string>
 </resources>

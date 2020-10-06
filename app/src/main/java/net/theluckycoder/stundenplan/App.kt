@@ -10,11 +10,11 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        val remoteConfig = Firebase.remoteConfig
+
         val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = 4 * 60 // 4 minutes
+            minimumFetchIntervalInSeconds = 5 * 60 // 5 minutes
         }
 
-        remoteConfig.setConfigSettingsAsync(configSettings)
+        Firebase.remoteConfig.setConfigSettingsAsync(configSettings)
     }
 }

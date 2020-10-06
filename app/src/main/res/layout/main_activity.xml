@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".ui.MainActivity">
 
     <com.github.barteksc.pdfviewer.PDFView
         android:id="@+id/viewer"
@@ -17,6 +17,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/color_primary_transparent"
         android:theme="?attr/actionBarTheme"
+        app:title="@string/activity_title"
         app:titleTextColor="@color/white" />
 
     <ProgressBar

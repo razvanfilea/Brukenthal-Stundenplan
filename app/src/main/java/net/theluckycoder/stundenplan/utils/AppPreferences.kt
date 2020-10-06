@@ -1,9 +1,10 @@
-package net.theluckycoder.stundenplan
+package net.theluckycoder.stundenplan.utils
 
 import android.content.Context
 import androidx.core.content.edit
+import net.theluckycoder.stundenplan.TimetableType
 
-class Preferences(context: Context) {
+class AppPreferences(context: Context) {
 
     private val sharedPreferences = context.getSharedPreferences("preferences", Context.MODE_PRIVATE)
 

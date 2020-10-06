@@ -12,6 +12,10 @@
         android:title="@string/action_refresh" />
 
     <item
-        android:id="@+id/action_switch_timetable_type"
-        android:title="Change Time Table" />
+        android:id="@+id/action_switch_to_high_school"
+        android:title="@string/action_switch_to_high_school" />
+
+    <item
+        android:id="@+id/action_switch_to_middle_school"
+        android:title="@string/action_switch_to_middle_school" />
 </menu>
