@@ -15,31 +15,35 @@ android {
         targetSdkVersion(Versions.Sdk.target)
         versionCode(Versions.App.versionCode)
         versionName(Versions.App.versionName)
+
+        resConfigs("en", "de")
     }
 
     buildTypes {
         getByName("debug") {
-            manifestPlaceholders(mapOf("firebaseDisabled" to true))
+            addManifestPlaceholders(mapOf("firebaseDisabled" to true))
 
             extra.set("enableCrashlytics", false)
             extra.set("alwaysUpdateBuildId", false)
             isCrunchPngs = false
         }
         getByName("release") {
-            manifestPlaceholders(mapOf("firebaseDisabled" to false))
+            addManifestPlaceholders(mapOf("firebaseDisabled" to false))
 
             isMinifyEnabled = true
             isShrinkResources = true
             isZipAlignEnabled = true
 
-            ndk {
-                abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
-            }
-
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+
+    bundle {
+        language {
+            enableSplit = false
         }
     }
 
@@ -69,6 +73,7 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.2.5")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:${Versions.androidxLifecycle}")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.androidxLifecycle}")
+    implementation("androidx.datastore:datastore-preferences:1.0.0-alpha01")
 
     implementation("com.google.firebase:firebase-analytics-ktx:17.5.0")
     implementation("com.google.firebase:firebase-config-ktx:19.2.0")

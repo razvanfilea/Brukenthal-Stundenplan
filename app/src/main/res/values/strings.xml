@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Stundenthal</string>
+    <string name="app_name" translatable="false">Brukplan</string>
     <string name="activity_title">Brukenthal Timetable</string>
 
     <string name="action_switch_theme">Switch Theme</string>

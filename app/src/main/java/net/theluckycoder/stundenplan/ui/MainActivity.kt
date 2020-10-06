@@ -1,6 +1,5 @@
 package net.theluckycoder.stundenplan.ui
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
 import android.view.Menu
@@ -24,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: MainActivityBinding
 
     private var isToolbarVisible = true
+    private var timetableType: TimetableType? = null
+    private var useDarkTheme = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
 
         binding.viewer.maxZoom = 6f
-        binding.viewer.setNightMode(true)
+        binding.viewer.setNightMode(useDarkTheme)
         binding.viewer.setOnClickListener {
             supportActionBar?.let {
                 TransitionManager.beginDelayedTransition(binding.root, Slide(Gravity.TOP))
@@ -48,14 +49,14 @@ class MainActivity : AppCompatActivity() {
             when (result) {
                 is NetworkResult.Success -> {
                     hideProgressBar()
-                    configurePdfViewer(result)
+                    displayPdf(result)
                 }
                 is NetworkResult.Loading -> {
                     with(binding.progressBar) {
                         isIndeterminate = result.indeterminate
                         progress = result.progress
-                        showProgressBar()
                     }
+                    showProgressBar()
                 }
                 is NetworkResult.Failed -> {
                     hideProgressBar()
@@ -63,6 +64,31 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        viewModel.darkThemeData.observe(this, { darkTheme ->
+            if (useDarkTheme != darkTheme) {
+                useDarkTheme = darkTheme
+
+                with(binding.viewer) {
+                    setNightMode(darkTheme)
+                    loadPages()
+                }
+            }
+        })
+
+        viewModel.timetableTypeData.observe(this, {
+            // Load last file first, then attempt to download a new one
+            // Since it's very likely that the last downloaded PDF is also the most recent one
+            if (savedInstanceState == null)
+                viewModel.preload(it)
+
+            if (timetableType != it) {
+                timetableType = it
+                invalidateOptionsMenu()
+
+                viewModel.reload(it)
+            }
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -70,15 +96,19 @@ class MainActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        menu.findItem(R.id.action_switch_to_high_school)
+            .isVisible = timetableType != TimetableType.HIGH_SCHOOL
+        menu.findItem(R.id.action_switch_to_middle_school)
+            .isVisible = timetableType != TimetableType.MIDDLE_SCHOOL
+
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_switch_theme -> {
-                with(binding.viewer) {
-                    setNightMode(viewModel.switchTheme())
-                    loadPages()
-                }
-            }
-            R.id.action_refresh -> viewModel.reload()
+            R.id.action_switch_theme -> viewModel.switchTheme(!useDarkTheme)
+            R.id.action_refresh -> viewModel.reload(timetableType!!)
             R.id.action_switch_to_high_school -> viewModel.switchTimetableType(TimetableType.HIGH_SCHOOL)
             R.id.action_switch_to_middle_school -> viewModel.switchTimetableType(TimetableType.MIDDLE_SCHOOL)
             else -> return super.onOptionsItemSelected(item)
@@ -86,7 +116,7 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    private fun configurePdfViewer(result: NetworkResult.Success) {
+    private fun displayPdf(result: NetworkResult.Success) {
         binding.viewer.fromUri(result.fileUri)
             .enableSwipe(true)
             .swipeHorizontal(false)
@@ -94,7 +124,7 @@ class MainActivity : AppCompatActivity() {
             .onError { Snackbar.make(binding.root, R.string.error_rendering_failed, Snackbar.LENGTH_LONG).show() }
             .enableAntialiasing(true)
             .pageFitPolicy(FitPolicy.WIDTH) // mode to fit pages in the view
-            .nightMode(result.darkTheme)
+            .nightMode(useDarkTheme)
             .load()
     }
 

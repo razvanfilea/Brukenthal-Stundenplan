@@ -11,7 +11,7 @@ const SITE_URL = "https://brukenthal.ro";
 const KEY_HIGH_SCHOOL = "url_high_school";
 const KEY_MIDDLE_SCHOOL = "url_middle_school";
 
-function updateRemoteConfig(middleSchoolUrl: string, highSchoolUrl: string) {
+function updateRemoteConfig(middleSchoolUrl: string, highSchoolUrl: string): Promise<void> {
     console.log("High School Url: " + highSchoolUrl);
     console.log("Middle School Url: " + middleSchoolUrl);
 
@@ -25,10 +25,10 @@ function updateRemoteConfig(middleSchoolUrl: string, highSchoolUrl: string) {
             // Check if the values have changed
             if (highSchoolDefault.value !== highSchoolUrl || middleSchoolDefault.value !== middleSchoolUrl) {
                 // Update the template
-                template.parameters[KEY_HIGH_SCHOOL] = {
+                parameters[KEY_HIGH_SCHOOL] = {
                     defaultValue: {value: highSchoolUrl}
                 };
-                template.parameters[KEY_MIDDLE_SCHOOL] = {
+                parameters[KEY_MIDDLE_SCHOOL] = {
                     defaultValue: {value: middleSchoolUrl}
                 };
 
@@ -52,7 +52,7 @@ exports.checkForNewTimetable = functions
     .pubsub
     .schedule('every 30 minutes')
     .onRun(() => {
-        return fetch(SITE_URL).then(data => data.text())
+        fetch(SITE_URL).then(data => data.text())
             .then(data => {
                 const dom = new JSDOM(data);
                 const doc = dom.window.document;

@@ -2,28 +2,44 @@ package net.theluckycoder.stundenplan.utils
 
 import android.content.Context
 import androidx.core.content.edit
+import androidx.datastore.createDataStore
+import androidx.datastore.preferences.createDataStore
+import androidx.datastore.preferences.edit
+import androidx.datastore.preferences.preferencesKey
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import net.theluckycoder.stundenplan.TimetableType
 
 class AppPreferences(context: Context) {
 
-    private val sharedPreferences = context.getSharedPreferences("preferences", Context.MODE_PRIVATE)
+    private val userTeamDataStore = context.createDataStore(name = DATA_STORE_NAME)
 
-    var useDarkTheme: Boolean
-        get() = sharedPreferences.getBoolean(DARK_THEME, false)
-        set(value) = sharedPreferences.edit { putBoolean(DARK_THEME, value) }
-
-    private var isHighSchool: Boolean
-        get() = sharedPreferences.getBoolean(SCHOOL_TYPE, true)
-        set(value) = sharedPreferences.edit { putBoolean(SCHOOL_TYPE, value) }
-
-    var timetableType: TimetableType
-        get() = if (isHighSchool) TimetableType.HIGH_SCHOOL else TimetableType.MIDDLE_SCHOOL
-        set(value) {
-            isHighSchool = (value == TimetableType.HIGH_SCHOOL)
+    val darkThemeFlow: Flow<Boolean> = userTeamDataStore.data
+        .map { preferences ->
+            preferences[DARK_THEME] ?: false
         }
 
+    suspend fun updateUseDarkTheme(useDarkTheme: Boolean) = userTeamDataStore.edit { preferences ->
+        preferences[DARK_THEME] = useDarkTheme
+    }
+
+    val timetableTypeFlow: Flow<TimetableType> = userTeamDataStore.data
+        .map { preferences ->
+            if (preferences[TIMETABLE_TYPE] == false)
+                TimetableType.MIDDLE_SCHOOL
+            else
+                TimetableType.HIGH_SCHOOL
+        }
+
+    suspend fun updateTimetableType(timetableType: TimetableType) = userTeamDataStore.edit { preferences ->
+        preferences[TIMETABLE_TYPE] = timetableType == TimetableType.HIGH_SCHOOL
+    }
+
     companion object {
-        private const val DARK_THEME = "dark_theme"
-        private const val SCHOOL_TYPE = "is_high_school"
+        private const val DATA_STORE_NAME = "user_prefs"
+
+        private val DARK_THEME = preferencesKey<Boolean>("dark_theme")
+        private val TIMETABLE_TYPE = preferencesKey<Boolean>("timetable_type")
     }
 }
