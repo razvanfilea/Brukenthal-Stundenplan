@@ -7,9 +7,9 @@ import ExplicitParameterValue = admin.remoteConfig.ExplicitParameterValue;
 admin.initializeApp();
 
 const SITE_URL = "https://brukenthal.ro";
-// TODO: Update the keys
-const KEY_HIGH_SCHOOL = "url_orar_liceu";
-const KEY_MIDDLE_SCHOOL = "url_orar_gimnaziu";
+
+const KEY_HIGH_SCHOOL = "url_high_school";
+const KEY_MIDDLE_SCHOOL = "url_middle_school";
 
 function updateRemoteConfig(middleSchoolUrl: string, highSchoolUrl: string) {
     console.log("High School Url: " + highSchoolUrl);
@@ -50,7 +50,7 @@ function updateRemoteConfig(middleSchoolUrl: string, highSchoolUrl: string) {
 exports.checkForNewTimetable = functions
     .region('europe-west1')
     .pubsub
-    .schedule('every 2 hours')
+    .schedule('every 30 minutes')
     .onRun(() => {
         return fetch(SITE_URL).then(data => data.text())
             .then(data => {
@@ -69,18 +69,20 @@ exports.checkForNewTimetable = functions
 
 exports.sendNewTimetableNotification = functions.region('europe-west1').remoteConfig.onUpdate(versionMetadata => {
     const messages = [
-        "You there! I heard that there\'s a new Stundenplan in town",
+        "Yeah, I've got time",
+        "Happy Spooktober",
+        "Stay safe",
+        "Hello there!",
         "Hippity hoppity your time is now my property 🔫",
-        "How about I change your timetable?",
-        "get nae naed"
+        "How about I change your timetable?"
     ];
-    const message = messages[Math.floor(Math.random() * messages.length)];
+    const messageBody = messages[Math.floor(Math.random() * messages.length)];
 
     const condition = "\'all\' in topics";
     const payload = {
         data: {
-            title: "Stundenplan",
-            body: message
+            title: "Brukenthal Stundenplan",
+            body: messageBody
         }
     };
 
