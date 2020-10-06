@@ -1,6 +1,5 @@
 package net.theluckycoder.stundenplan.repository
 
-import android.app.Application
 import android.content.Context
 import androidx.core.net.toUri
 import com.tonyodev.fetch2.AbstractFetchListener
@@ -17,6 +16,7 @@ import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.flow.callbackFlow
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.TimetableType
+import net.theluckycoder.stundenplan.utils.FirebaseConstants
 import net.theluckycoder.stundenplan.utils.NetworkResult
 import net.theluckycoder.stundenplan.utils.getConfigKey
 import java.io.File
@@ -96,5 +96,10 @@ class MainRepository(private val context: Context) {
             .filterNotNull()
             .sortedDescending()
             .firstOrNull()
+    }
+
+    fun clearCache() {
+        File(context.cacheDir, FirebaseConstants.KEY_HIGH_SCHOOL).deleteRecursively()
+        File(context.cacheDir, FirebaseConstants.KEY_MIDDLE_SCHOOL).deleteRecursively()
     }
 }

@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
             when (result) {
                 is NetworkResult.Success -> {
                     hideProgressBar()
-                    configurePdfViewer(result.fileUri)
+                    configurePdfViewer(result)
                 }
                 is NetworkResult.Loading -> {
                     with(binding.progressBar) {
@@ -86,15 +86,15 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    private fun configurePdfViewer(uri: Uri) {
-        binding.viewer.fromUri(uri)
+    private fun configurePdfViewer(result: NetworkResult.Success) {
+        binding.viewer.fromUri(result.fileUri)
             .enableSwipe(true)
             .swipeHorizontal(false)
             .enableDoubletap(true)
             .onError { Snackbar.make(binding.root, R.string.error_rendering_failed, Snackbar.LENGTH_LONG).show() }
             .enableAntialiasing(true)
             .pageFitPolicy(FitPolicy.WIDTH) // mode to fit pages in the view
-            .nightMode(true) // TODO : Fix
+            .nightMode(result.darkTheme)
             .load()
     }
 

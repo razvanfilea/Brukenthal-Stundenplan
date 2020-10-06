@@ -7,7 +7,7 @@
     <string name="action_switch_to_high_school">Switch to High School</string>
     <string name="action_switch_to_middle_school">Switch to Middle School</string>
 
-    <string name="error_network_connection">No internet connection</string>
+    <string name="error_network_connection">No internet connection!</string>
     <string name="error_download_failed">Failed to download Timetable</string>
     <string name="error_rendering_failed">Could not display Timetable</string>
 

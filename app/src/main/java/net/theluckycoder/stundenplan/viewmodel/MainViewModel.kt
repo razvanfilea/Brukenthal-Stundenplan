@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.ktx.messaging
 import com.google.firebase.remoteconfig.ktx.get
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.tonyodev.fetch2core.isNetworkAvailable
@@ -32,7 +33,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = MainRepository(app)
-    private val firebaseMessaging = FirebaseMessaging.getInstance()
     private val isDownloading = AtomicBoolean(false)
     private val preferences = AppPreferences(app)
 
@@ -42,15 +42,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val timetableType = preferences.timetableType
 
         viewModelScope.launch(Dispatchers.IO) {
-            firebaseMessaging.subscribeToTopic(FirebaseConstants.TOPIC_ALL)
-
-            firebaseMessaging.subscribeToTopic(timetableType.getFirebaseTopic())
+            with(Firebase.messaging) {
+                subscribeToTopic(FirebaseConstants.TOPIC_ALL)
+                subscribeToTopic(timetableType.getFirebaseTopic())
+            }
         }
 
         // Load last file first, then attempt to download a new one
         // It's very likely that the last downloaded PDF is also the most recent one
         repository.getLastFile(timetableType)?.toUri()?.let {
-            NetworkResult.Success(it)
+            NetworkResult.Success(it, preferences.useDarkTheme)
         }
 
         reload(timetableType)
@@ -66,11 +67,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun switchTimetableType(timetableType: TimetableType) =
         viewModelScope.launch(Dispatchers.IO) {
-            firebaseMessaging.unsubscribeFromTopic(timetableType.getFirebaseTopic())
+            Firebase.messaging.unsubscribeFromTopic(timetableType.getFirebaseTopic())
 
             val newTimetableType =
                 if (timetableType == TimetableType.HIGH_SCHOOL) TimetableType.MIDDLE_SCHOOL else TimetableType.HIGH_SCHOOL
-            firebaseMessaging.subscribeToTopic(newTimetableType.getFirebaseTopic())
+            Firebase.messaging.subscribeToTopic(newTimetableType.getFirebaseTopic())
             preferences.timetableType = newTimetableType
 
             reload(newTimetableType)

@@ -29,6 +29,10 @@
             </intent-filter>
         </service>
 
+        <meta-data
+            android:name="firebase_analytics_collection_deactivated"
+            android:value="true" /> <!-- ${disableFirebase} -->
+
     </application>
 
 </manifest>

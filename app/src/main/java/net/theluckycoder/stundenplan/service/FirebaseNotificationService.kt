@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import net.theluckycoder.stundenplan.ui.MainActivity
 import net.theluckycoder.stundenplan.R
+import net.theluckycoder.stundenplan.repository.MainRepository
 
 class FirebaseNotificationService : FirebaseMessagingService() {
 
@@ -44,7 +45,7 @@ class FirebaseNotificationService : FirebaseMessagingService() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
-            NOTIFICATION_CHANNEL,
+            NOTIFICATION_CHANNEL_ID,
             getString(R.string.notifications_channel_title),
             NotificationManager.IMPORTANCE_DEFAULT
         )
@@ -55,7 +56,7 @@ class FirebaseNotificationService : FirebaseMessagingService() {
     private fun sendNotification(title: String, text: String) {
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
+        val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_notification)
@@ -68,15 +69,25 @@ class FirebaseNotificationService : FirebaseMessagingService() {
         NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification)
 
         updateRemoteConfig()
+        cleanCacheDir()
     }
 
     private fun updateRemoteConfig() = GlobalScope.launch(Dispatchers.IO) {
         val remoteConfig = Firebase.remoteConfig
-        remoteConfig.fetch(1).await()
 
+        remoteConfig.fetch(1).await()
         Log.d(TAG, "New Remote Config Fetched")
+
         remoteConfig.activate().await()
         Log.d(TAG, "New Remote Config Activated")
+    }
+
+    private fun cleanCacheDir() {
+        val appContext = applicationContext
+
+        GlobalScope.launch(Dispatchers.IO) {
+            MainRepository(appContext).clearCache()
+        }
     }
 
     private fun getPendingIntent(): PendingIntent {
@@ -87,7 +98,7 @@ class FirebaseNotificationService : FirebaseMessagingService() {
 
     companion object {
         private const val TAG = "FirebaseNotifications"
-        private const val NOTIFICATION_CHANNEL = "notifications"
+        private const val NOTIFICATION_CHANNEL_ID = "notifications"
 
         const val NOTIFICATION_ID = 1
     }

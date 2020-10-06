@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Stundenthal</string>
+    <string name="activity_title">Brukenthal Studenplan</string>
+
+    <string name="action_switch_theme">Thema wechseln</string>
+    <string name="action_refresh">Neu laden</string>
+    <string name="action_switch_to_high_school">Wechseln zu Lyzeum</string>
+    <string name="action_switch_to_middle_school">Wechseln zu Gymnasium</string>
+
+    <string name="error_network_connection">Keine Internetverbindung!</string>
+    <string name="error_download_failed">Stundenplan konnte nicht heruntergeladen werden</string>
+    <string name="error_rendering_failed">Stundenplan konnte nicht angezeigt werden</string>
+
+    <string name="notifications_channel_title">Benachrichtigungen</string>
+    <string name="new_timetable_notification">Neuer Stundenplan!</string>
+</resources>
