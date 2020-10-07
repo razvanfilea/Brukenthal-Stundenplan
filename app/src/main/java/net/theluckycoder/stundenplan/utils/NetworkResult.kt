@@ -5,5 +5,5 @@ import android.net.Uri
 sealed class NetworkResult {
     class Success(val fileUri: Uri) : NetworkResult()
     class Loading(val indeterminate: Boolean, val progress: Int) : NetworkResult()
-    class Failed(val stringRes: Int) : NetworkResult()
+    class Failed(val reasonStringRes: Int) : NetworkResult()
 }

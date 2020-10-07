@@ -4,6 +4,7 @@
 
     <string name="action_switch_theme">Switch Theme</string>
     <string name="action_refresh">Refresh</string>
+    <string name="action_retry">Retry</string>
     <string name="action_switch_to_high_school">Switch to High School</string>
     <string name="action_switch_to_middle_school">Switch to Middle School</string>
 

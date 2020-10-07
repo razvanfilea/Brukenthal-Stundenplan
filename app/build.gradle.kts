@@ -23,8 +23,6 @@ android {
         getByName("debug") {
             addManifestPlaceholders(mapOf("firebaseDisabled" to true))
 
-            extra.set("enableCrashlytics", false)
-            extra.set("alwaysUpdateBuildId", false)
             isCrunchPngs = false
         }
         getByName("release") {

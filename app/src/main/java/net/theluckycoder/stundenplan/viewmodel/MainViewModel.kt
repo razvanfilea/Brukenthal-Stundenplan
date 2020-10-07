@@ -23,6 +23,7 @@ import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.TimetableType
 import net.theluckycoder.stundenplan.repository.MainRepository
 import net.theluckycoder.stundenplan.utils.AppPreferences
+import net.theluckycoder.stundenplan.utils.FirebaseConstants
 import net.theluckycoder.stundenplan.utils.NetworkResult
 import net.theluckycoder.stundenplan.utils.app
 import net.theluckycoder.stundenplan.utils.getConfigKey
@@ -39,6 +40,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val darkThemeData = preferences.darkThemeFlow.asLiveData()
     val timetableTypeData = preferences.timetableTypeFlow.asLiveData()
+
+    init {
+        Firebase.messaging.subscribeToTopic(FirebaseConstants.TOPIC_ALL)
+    }
 
     fun getStateLiveData(): LiveData<NetworkResult> = stateData
 

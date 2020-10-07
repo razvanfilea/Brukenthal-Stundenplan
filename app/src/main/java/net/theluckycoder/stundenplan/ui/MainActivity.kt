@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.github.barteksc.pdfviewer.util.FitPolicy
@@ -60,7 +61,11 @@ class MainActivity : AppCompatActivity() {
                 }
                 is NetworkResult.Failed -> {
                     hideProgressBar()
-                    Snackbar.make(binding.root, result.stringRes, Snackbar.LENGTH_LONG).show()
+                    makeErrorSnackbar(result.reasonStringRes)
+                        .setAction(R.string.action_retry) {
+                            viewModel.reload(timetableType!!)
+                        }
+                        .show()
                 }
             }
         }
@@ -116,12 +121,20 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    private fun makeErrorSnackbar(stringRes: Int) =
+        Snackbar.make(binding.root, stringRes, Snackbar.LENGTH_LONG)
+            .setTextColor(ContextCompat.getColor(this, R.color.white))
+            .setActionTextColor(ContextCompat.getColor(this, R.color.white))
+            .setBackgroundTint(ContextCompat.getColor(this, R.color.red_800))
+
     private fun displayPdf(result: NetworkResult.Success) {
         binding.viewer.fromUri(result.fileUri)
             .enableSwipe(true)
             .swipeHorizontal(false)
             .enableDoubletap(true)
-            .onError { Snackbar.make(binding.root, R.string.error_rendering_failed, Snackbar.LENGTH_LONG).show() }
+            .onError {
+                makeErrorSnackbar(R.string.error_rendering_failed).show()
+            }
             .enableAntialiasing(true)
             .pageFitPolicy(FitPolicy.WIDTH) // mode to fit pages in the view
             .nightMode(useDarkTheme)

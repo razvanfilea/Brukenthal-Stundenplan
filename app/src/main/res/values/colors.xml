@@ -6,6 +6,7 @@
     <color name="color_secondary">#64dd17</color>
     <color name="color_secondary_dark">#1faa00</color>
 
+    <color name="red_800">#C62828</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

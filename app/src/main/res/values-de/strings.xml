@@ -4,6 +4,7 @@
 
     <string name="action_switch_theme">Thema wechseln</string>
     <string name="action_refresh">Neu laden</string>
+    <string name="action_retry">Wieder versuchen</string>
     <string name="action_switch_to_high_school">Wechseln zu Lyzeum</string>
     <string name="action_switch_to_middle_school">Wechseln zu Gymnasium</string>
 
