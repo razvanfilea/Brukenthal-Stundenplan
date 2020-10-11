@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
                     hideProgressBar()
                     makeErrorSnackbar(result.reasonStringRes)
                         .setAction(R.string.action_retry) {
-                            viewModel.reload(timetableType!!)
+                            viewModel.refresh(timetableType!!)
                         }
                         .show()
                 }
@@ -89,9 +89,12 @@ class MainActivity : AppCompatActivity() {
 
             if (timetableType != it) {
                 timetableType = it
+                supportActionBar?.subtitle =
+                    getString(if (it == TimetableType.HIGH_SCHOOL) R.string.high_school else R.string.middle_school)
+
                 invalidateOptionsMenu()
 
-                viewModel.reload(it)
+                viewModel.refresh(it)
             }
         })
     }
@@ -113,7 +116,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_switch_theme -> viewModel.switchTheme(!useDarkTheme)
-            R.id.action_refresh -> viewModel.reload(timetableType!!)
+            R.id.action_refresh -> viewModel.refresh(timetableType!!)
             R.id.action_switch_to_high_school -> viewModel.switchTimetableType(TimetableType.HIGH_SCHOOL)
             R.id.action_switch_to_middle_school -> viewModel.switchTimetableType(TimetableType.MIDDLE_SCHOOL)
             else -> return super.onOptionsItemSelected(item)

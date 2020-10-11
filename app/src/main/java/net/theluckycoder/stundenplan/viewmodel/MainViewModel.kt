@@ -22,6 +22,7 @@ import kotlinx.coroutines.withContext
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.TimetableType
 import net.theluckycoder.stundenplan.repository.MainRepository
+import net.theluckycoder.stundenplan.utils.Analytics
 import net.theluckycoder.stundenplan.utils.AppPreferences
 import net.theluckycoder.stundenplan.utils.FirebaseConstants
 import net.theluckycoder.stundenplan.utils.NetworkResult
@@ -60,7 +61,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             Firebase.messaging.subscribeToTopic(newTimetableType.getFirebaseTopic())
             preferences.updateTimetableType(newTimetableType)
 
-            reload(newTimetableType)
+            refresh(newTimetableType)
         }
 
     fun preload(timetableType: TimetableType) = viewModelScope.launch {
@@ -70,7 +71,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             NetworkResult.Success(fileUri)
     }
 
-    fun reload(timetableType: TimetableType) = viewModelScope.launch {
+    fun refresh(timetableType: TimetableType) = viewModelScope.launch {
         if (!app.isNetworkAvailable()) {
             stateData.value = NetworkResult.Failed(R.string.error_network_connection)
             return@launch
@@ -78,6 +79,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         if (isDownloading.get())
             return@launch
+
+        Analytics.refreshEvent(timetableType)
 
         isDownloading.set(true)
 

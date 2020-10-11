@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="activity_title">Brukenthal Studenplan</string>
+    <string name="activity_title">Brukenthal Stundenplan</string>
+    <string name="high_school">Lyzeum</string>
+    <string name="middle_school">Gymnasium</string>
 
     <string name="action_switch_theme">Thema wechseln</string>
     <string name="action_refresh">Neu laden</string>

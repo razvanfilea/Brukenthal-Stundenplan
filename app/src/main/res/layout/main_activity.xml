@@ -17,6 +17,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/color_primary_transparent"
         android:theme="?attr/actionBarTheme"
+        app:subtitle="@string/high_school"
         app:title="@string/activity_title"
         app:titleTextColor="@color/white" />
 

@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name" translatable="false">Brukplan</string>
+
     <string name="activity_title">Brukenthal Timetable</string>
+    <string name="high_school">High School</string>
+    <string name="middle_school">Middle School</string>
 
     <string name="action_switch_theme">Switch Theme</string>
     <string name="action_refresh">Refresh</string>
