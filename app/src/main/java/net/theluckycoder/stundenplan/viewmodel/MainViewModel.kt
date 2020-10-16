@@ -84,10 +84,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         isDownloading.set(true)
 
-        val remoteConfig = Firebase.remoteConfig
         stateData.value = NetworkResult.Loading(true, 0)
 
         try {
+            val remoteConfig = Firebase.remoteConfig
+
             val successful = remoteConfig.fetchAndActivate().await()
             if (!successful)
                 Log.i(PDF_TAG, "Remote Config fetch not successful")

@@ -8,6 +8,7 @@ buildscript {
         classpath("com.android.tools.build:gradle:4.1.0-rc03")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}")
         classpath("com.google.gms:google-services:4.3.4")
+        classpath("com.google.firebase:firebase-crashlytics-gradle:2.3.0")
     }
 }
 

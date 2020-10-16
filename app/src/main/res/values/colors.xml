@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="color_primary_transparent">#CC455A64</color>
+    <color name="color_primary_transparent">#D9455A64</color>
     <color name="color_primary">#455a64</color>
     <color name="color_primary_dark">#1c313a</color>
     <color name="color_secondary">#64dd17</color>

@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.timetableTypeData.observe(this, {
             // Load last file first, then attempt to download a new one
             // Since it's very likely that the last downloaded PDF is also the most recent one
-            if (savedInstanceState == null)
+            if (timetableType == null)
                 viewModel.preload(it)
 
             if (timetableType != it) {

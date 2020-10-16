@@ -4,6 +4,7 @@ plugins {
     kotlin("android")
 
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -21,12 +22,14 @@ android {
 
     buildTypes {
         getByName("debug") {
-            addManifestPlaceholders(mapOf("firebaseDisabled" to true))
+            addManifestPlaceholders(mapOf("firebaseDisabled" to true, "enableCrashlytics" to false))
 
             isCrunchPngs = false
+            extra.set("enableCrashlytics", false)
+            extra.set("alwaysUpdateBuildId", false)
         }
         getByName("release") {
-            addManifestPlaceholders(mapOf("firebaseDisabled" to false))
+            addManifestPlaceholders(mapOf("firebaseDisabled" to false, "enableCrashlytics" to true))
 
             isMinifyEnabled = true
             isShrinkResources = true
@@ -68,7 +71,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.3.2")
     implementation("androidx.appcompat:appcompat:1.2.0")
     implementation("com.google.android.material:material:1.2.1")
-    implementation("androidx.fragment:fragment-ktx:1.2.5")
+    implementation("androidx.activity:activity-ktx:1.1.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:${Versions.androidxLifecycle}")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.androidxLifecycle}")
     implementation("androidx.datastore:datastore-preferences:1.0.0-alpha01")
@@ -76,6 +79,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics-ktx:17.6.0")
     implementation("com.google.firebase:firebase-config-ktx:19.2.0")
     implementation("com.google.firebase:firebase-messaging-ktx:20.3.0")
+    implementation("com.google.firebase:firebase-crashlytics:17.2.2")
 
     implementation("com.github.barteksc:android-pdf-viewer:3.2.0-beta.1")
     implementation("androidx.tonyodev.fetch2:xfetch2:3.1.5")
