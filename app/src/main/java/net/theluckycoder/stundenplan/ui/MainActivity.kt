@@ -17,6 +17,7 @@ import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.TimetableType
 import net.theluckycoder.stundenplan.utils.NetworkResult
 import net.theluckycoder.stundenplan.databinding.MainActivityBinding
+import net.theluckycoder.stundenplan.utils.Analytics
 
 class MainActivity : AppCompatActivity() {
 
@@ -97,6 +98,9 @@ class MainActivity : AppCompatActivity() {
                 viewModel.refresh(it)
             }
         })
+
+        if (intent.getBooleanExtra(ARG_OPENED_FROM_NOTIFICATION, false))
+            Analytics.openNotificationEvent()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -156,5 +160,9 @@ class MainActivity : AppCompatActivity() {
             TransitionManager.beginDelayedTransition(root)
             progressBar.visibility = View.GONE
         }
+    }
+
+    companion object {
+        const val ARG_OPENED_FROM_NOTIFICATION = "opened_from_notification"
     }
 }

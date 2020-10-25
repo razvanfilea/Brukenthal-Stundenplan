@@ -6,6 +6,7 @@ import com.google.firebase.ktx.Firebase
 import net.theluckycoder.stundenplan.TimetableType
 
 object Analytics {
+
     private val firebase by lazy { Firebase.analytics }
 
     fun refreshEvent(timetableType: TimetableType) {
@@ -19,5 +20,10 @@ object Analytics {
         firebase.logEvent(REFRESH_EVENT, bundle)
     }
 
+    fun openNotificationEvent() {
+        firebase.logEvent(OPEN_NOTIFICATION_EVENT, null)
+    }
+
     private const val REFRESH_EVENT = "timetable_refresh"
+    private const val OPEN_NOTIFICATION_EVENT = "open_notification"
 }

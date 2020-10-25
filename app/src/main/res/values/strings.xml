@@ -15,6 +15,8 @@
     <string name="error_download_failed">Failed to download Timetable</string>
     <string name="error_rendering_failed">Could not display Timetable</string>
 
-    <string name="notifications_channel_title">Notifications</string>
+    <string name="notifications_channel_default">Notifications</string>
+    <string name="notifications_channel_high_school">High School Notifications</string>
+    <string name="notifications_channel_middle_school">Middle School Notifications</string>
     <string name="new_timetable_notification">New Timetable!</string>
 </resources>

@@ -14,6 +14,8 @@
     <string name="error_download_failed">Stundenplan konnte nicht heruntergeladen werden</string>
     <string name="error_rendering_failed">Stundenplan konnte nicht angezeigt werden</string>
 
-    <string name="notifications_channel_title">Benachrichtigungen</string>
+    <string name="notifications_channel_default">Benachrichtigungen</string>
+    <string name="notifications_channel_high_school">Lyzeum Benachrichtigungen</string>
+    <string name="notifications_channel_middle_school">Gymnasium Benachrichtigungen</string>
     <string name="new_timetable_notification">Neuer Stundenplan!</string>
 </resources>

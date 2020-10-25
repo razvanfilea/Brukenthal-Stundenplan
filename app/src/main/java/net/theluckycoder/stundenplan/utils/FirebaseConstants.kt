@@ -7,6 +7,7 @@ object FirebaseConstants {
     const val KEY_MIDDLE_SCHOOL = "url_middle_school"
 
     const val TOPIC_ALL = "all"
+    const val TOPIC_TEST = "test"
     const val TOPIC_HIGH_SCHOOL = "high_school"
     const val TOPIC_MIDDLE_SCHOOL = "middle_school"
 }
@@ -14,9 +15,4 @@ object FirebaseConstants {
 fun TimetableType.getConfigKey() = when (this) {
     TimetableType.HIGH_SCHOOL -> FirebaseConstants.KEY_HIGH_SCHOOL
     TimetableType.MIDDLE_SCHOOL -> FirebaseConstants.KEY_MIDDLE_SCHOOL
-}
-
-fun TimetableType.getFirebaseTopic() = when (this) {
-    TimetableType.HIGH_SCHOOL -> FirebaseConstants.TOPIC_HIGH_SCHOOL
-    TimetableType.MIDDLE_SCHOOL -> FirebaseConstants.TOPIC_MIDDLE_SCHOOL
 }

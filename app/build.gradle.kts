@@ -22,14 +22,14 @@ android {
 
     buildTypes {
         getByName("debug") {
-            addManifestPlaceholders(mapOf("firebaseDisabled" to true, "enableCrashlytics" to false))
+            addManifestPlaceholders(mapOf("firebaseDisabled" to true, "crashlyticsEnabled" to false))
 
             isCrunchPngs = false
             extra.set("enableCrashlytics", false)
             extra.set("alwaysUpdateBuildId", false)
         }
         getByName("release") {
-            addManifestPlaceholders(mapOf("firebaseDisabled" to false, "enableCrashlytics" to true))
+            addManifestPlaceholders(mapOf("firebaseDisabled" to false, "crashlyticsEnabled" to true))
 
             isMinifyEnabled = true
             isShrinkResources = true
@@ -64,7 +64,7 @@ android {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.kotlin}")
+    kotlin("stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.kotlinCoroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:${Versions.kotlinCoroutines}")
 
@@ -74,12 +74,13 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.1.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:${Versions.androidxLifecycle}")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.androidxLifecycle}")
-    implementation("androidx.datastore:datastore-preferences:1.0.0-alpha01")
+    implementation("androidx.datastore:datastore-preferences:1.0.0-alpha02")
 
-    implementation("com.google.firebase:firebase-analytics-ktx:17.6.0")
-    implementation("com.google.firebase:firebase-config-ktx:19.2.0")
-    implementation("com.google.firebase:firebase-messaging-ktx:20.3.0")
-    implementation("com.google.firebase:firebase-crashlytics:17.2.2")
+    implementation(platform("com.google.firebase:firebase-bom:25.12.0"))
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-config-ktx")
+    implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
 
     implementation("com.github.barteksc:android-pdf-viewer:3.2.0-beta.1")
     implementation("androidx.tonyodev.fetch2:xfetch2:3.1.5")

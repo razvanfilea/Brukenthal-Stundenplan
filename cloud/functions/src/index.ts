@@ -10,6 +10,10 @@ const SITE_URL = "https://brukenthal.ro";
 const KEY_HIGH_SCHOOL = "url_high_school";
 const KEY_MIDDLE_SCHOOL = "url_middle_school";
 
+const CHANNEL_ID_DEFAULT = "default";
+const CHANNEL_ID_HIGH_SCHOOL = "high_school";
+const CHANNEL_ID_MIDDLE_SCHOOL = "middle_school";
+
 class ConfigValues {
     readonly highSchool: string
     readonly middleSchool: string
@@ -29,6 +33,10 @@ function processRemoteConfigTemplate(template: admin.remoteConfig.RemoteConfigTe
         admin.remoteConfig.ExplicitParameterValue;
 
     return new ConfigValues(highSchoolDefault.value, middleSchoolDefault.value);
+}
+
+function randomInt(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 async function updateRemoteConfig(newMiddleSchoolUrl: string, newHighSchoolUrl: string): Promise<void> {
@@ -107,32 +115,39 @@ exports.sendNewTimetableNotification = functions
     .remoteConfig
     .onUpdate(async (versionMetadata) => {
         const config = admin.remoteConfig();
-        const currentTemplate = config.getTemplate();
+        const newTemplate = config.getTemplate();
         const oldTemplate = config.getTemplateAtVersion(versionMetadata.versionNumber - 1);
 
-        const selectedTitle = TITLES[Math.floor(Math.random() * TITLES.length)];
-        const selectedMessage = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
+        const selectedTitle = TITLES[randomInt(0, TITLES.length - 1)];
+        const selectedMessage = MESSAGES[randomInt(0, MESSAGES.length - 1)];
 
-        const currentValues = processRemoteConfigTemplate(await currentTemplate);
+        const newValues = processRemoteConfigTemplate(await newTemplate);
         const oldValues = processRemoteConfigTemplate(await oldTemplate);
 
         let preTitle = "";
-        if (oldValues.middleSchool === currentValues.middleSchool && oldValues.highSchool !== currentValues.highSchool)
-            preTitle = "Lyzeum: "
-        else if (oldValues.middleSchool !== currentValues.middleSchool && oldValues.highSchool === currentValues.highSchool)
-            preTitle = "Gymnasium: "
+        let channel = CHANNEL_ID_DEFAULT;
+
+        if (oldValues.middleSchool === newValues.middleSchool && oldValues.highSchool !== newValues.highSchool) {
+            preTitle = "Lyzeum: ";
+            channel = CHANNEL_ID_HIGH_SCHOOL;
+        } else if (oldValues.middleSchool !== newValues.middleSchool && oldValues.highSchool === newValues.highSchool) {
+            preTitle = "Gymnasium: ";
+            channel = CHANNEL_ID_MIDDLE_SCHOOL;
+        } else if (oldValues.middleSchool === newValues.middleSchool && oldValues.highSchool === newValues.highSchool)
+            return
 
         const payload = {
             data: {
                 title: preTitle + selectedTitle,
-                body: selectedMessage
+                body: selectedMessage,
+                channel_id: channel
             }
         };
 
         return admin.messaging().sendToCondition("\'all\' in topics", payload).then(_ =>
             console.log("Notification sent")
         ).catch(err => {
-            console.error("Notification failed to send")
+            console.error("Notification failed to send");
             console.error(err)
         });
     });

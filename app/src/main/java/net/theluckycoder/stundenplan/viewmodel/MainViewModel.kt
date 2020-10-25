@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import net.theluckycoder.stundenplan.BuildConfig
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.TimetableType
 import net.theluckycoder.stundenplan.repository.MainRepository
@@ -28,7 +29,6 @@ import net.theluckycoder.stundenplan.utils.FirebaseConstants
 import net.theluckycoder.stundenplan.utils.NetworkResult
 import net.theluckycoder.stundenplan.utils.app
 import net.theluckycoder.stundenplan.utils.getConfigKey
-import net.theluckycoder.stundenplan.utils.getFirebaseTopic
 import java.util.concurrent.atomic.AtomicBoolean
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -43,7 +43,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val timetableTypeData = preferences.timetableTypeFlow.asLiveData()
 
     init {
-        Firebase.messaging.subscribeToTopic(FirebaseConstants.TOPIC_ALL)
+        try {
+            subscribeToFirebase()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     fun getStateLiveData(): LiveData<NetworkResult> = stateData
@@ -52,17 +56,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         preferences.updateUseDarkTheme(useDarkTheme)
     }
 
-    fun switchTimetableType(newTimetableType: TimetableType) =
-        viewModelScope.launch(Dispatchers.IO) {
-            val oldTimetableType =
-                if (newTimetableType == TimetableType.HIGH_SCHOOL) TimetableType.MIDDLE_SCHOOL else TimetableType.HIGH_SCHOOL
-            Firebase.messaging.unsubscribeFromTopic(oldTimetableType.getFirebaseTopic())
-
-            Firebase.messaging.subscribeToTopic(newTimetableType.getFirebaseTopic())
-            preferences.updateTimetableType(newTimetableType)
-
-            refresh(newTimetableType)
-        }
+    fun switchTimetableType(newTimetableType: TimetableType) = viewModelScope.launch(Dispatchers.IO) {
+        preferences.updateTimetableType(newTimetableType)
+    }
 
     fun preload(timetableType: TimetableType) = viewModelScope.launch {
         val fileUri = withContext(Dispatchers.IO) { repository.getLastFile(timetableType)?.toUri() }
@@ -108,6 +104,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         isDownloading.set(false)
+    }
+
+    private fun subscribeToFirebase() {
+        with(Firebase.messaging) {
+            subscribeToTopic(FirebaseConstants.TOPIC_ALL)
+
+            if (BuildConfig.DEBUG)
+                subscribeToTopic(FirebaseConstants.TOPIC_TEST)
+
+            unsubscribeFromTopic(FirebaseConstants.TOPIC_HIGH_SCHOOL)
+            unsubscribeFromTopic(FirebaseConstants.TOPIC_MIDDLE_SCHOOL)
+        }
     }
 
     private companion object {
