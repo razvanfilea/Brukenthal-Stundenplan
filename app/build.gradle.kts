@@ -68,20 +68,20 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.kotlinCoroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:${Versions.kotlinCoroutines}")
 
-    implementation("androidx.core:core-ktx:1.3.2")
+    implementation("androidx.core:core-ktx:1.5.0-beta01")
     implementation("androidx.appcompat:appcompat:1.2.0")
-    implementation("com.google.android.material:material:1.2.1")
+    implementation("com.google.android.material:material:1.3.0")
     implementation("androidx.activity:activity-ktx:1.1.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:${Versions.androidxLifecycle}")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.androidxLifecycle}")
-    implementation("androidx.datastore:datastore-preferences:1.0.0-alpha02")
+    implementation("androidx.datastore:datastore-preferences:1.0.0-alpha06")
 
-    implementation(platform("com.google.firebase:firebase-bom:25.12.0"))
+    implementation(platform("com.google.firebase:firebase-bom:26.4.0"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-config-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")
 
     implementation("com.github.barteksc:android-pdf-viewer:3.2.0-beta.1")
-    implementation("androidx.tonyodev.fetch2:xfetch2:3.1.5")
+    implementation("androidx.tonyodev.fetch2:xfetch2:3.1.6")
 }
