@@ -5,15 +5,54 @@ import {JSDOM} from 'jsdom';
 
 admin.initializeApp();
 
+/// Constants
+
+/**
+ * The site itself
+ */
 const SITE_URL = "https://brukenthal.ro";
 
+/**
+ * The keys defined in the Firebase Console -> Remote Config, used to store the timetable URLs
+ */
 const KEY_HIGH_SCHOOL = "url_high_school";
 const KEY_MIDDLE_SCHOOL = "url_middle_school";
 
+/**
+ * Channel IDs used for sending notifications
+ * This need to be the same as in
+ */
 const CHANNEL_ID_DEFAULT = "default";
 const CHANNEL_ID_HIGH_SCHOOL = "high_school";
 const CHANNEL_ID_MIDDLE_SCHOOL = "middle_school";
 
+/**
+ * The titles and messages used for notifications
+ */
+const TITLES = [
+    "Der Stundenplan hat sich verändert!",
+    "Ein neuer Stundenplan ist da",
+    "Achtung Stundenplanveränderung!",
+    "Der Stundenplan ist aktualisiert",
+    "Neue Veränderungen im Stundenplan!"
+];
+const MESSAGES = [
+    "Diamond Hands!💎👐🚀🚀🚀",
+    "doot doot",
+    "Aww man!",
+    "Haideți copii înapoi la ora, nu mai chiuliți!",
+    "Geschwindigkeit und Prezision!",
+    "I used to be an adventurer like you, then I took an arrow to the knee.",
+    "It is...   ...acceptable",
+    "He turned himself into a pickle, funniest thing I've ever seen",
+    "Bate bacu' in geam... nu-l aud ca am termopan"
+];
+
+/// Structures
+
+/**
+ * A small immutable class used for convenience to store the links to the timetables
+ */
 class ConfigValues {
     readonly highSchool: string
     readonly middleSchool: string
@@ -24,6 +63,19 @@ class ConfigValues {
     }
 }
 
+/// Helper Functions
+
+/**
+ * Self explanatory, generate a random integer between [min] and [max]
+ */
+function randomInt(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+/**
+ * Parses a RemoteConfig template into a ConfigValues
+ * @param template the template to parse
+ */
 function processRemoteConfigTemplate(template: admin.remoteConfig.RemoteConfigTemplate): ConfigValues {
     const parameters = template.parameters;
 
@@ -35,27 +87,28 @@ function processRemoteConfigTemplate(template: admin.remoteConfig.RemoteConfigTe
     return new ConfigValues(highSchoolDefault.value, middleSchoolDefault.value);
 }
 
-function randomInt(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
+/**
+ * Updates the Remote Config values
+ */
+async function updateRemoteConfig(newConfigValues: ConfigValues): Promise<void> {
+    console.log("High School Url: " + newConfigValues.highSchool);
+    console.log("Middle School Url: " + newConfigValues.middleSchool);
 
-async function updateRemoteConfig(newMiddleSchoolUrl: string, newHighSchoolUrl: string): Promise<void> {
-    console.log("High School Url: " + newHighSchoolUrl);
-    console.log("Middle School Url: " + newMiddleSchoolUrl);
+    const config = admin.remoteConfig(); // Get Access to Firebase Remote Config
+    const template = await config.getTemplate(); // Get the current template
 
-    const config = admin.remoteConfig();
-    const template = await config.getTemplate();
+    const currentValues = processRemoteConfigTemplate(template);
 
-    const values = processRemoteConfigTemplate(template);
+    // Check if the currentValues have changed
+    if (currentValues.highSchool !== newConfigValues.highSchool
+        || currentValues.middleSchool !== newConfigValues.middleSchool) {
 
-    // Check if the values have changed
-    if (values.highSchool !== newHighSchoolUrl || values.middleSchool !== newMiddleSchoolUrl) {
         // Update the template
         template.parameters[KEY_HIGH_SCHOOL] = {
-            defaultValue: {value: newHighSchoolUrl}
+            defaultValue: {value: newConfigValues.highSchool}
         };
         template.parameters[KEY_MIDDLE_SCHOOL] = {
-            defaultValue: {value: newMiddleSchoolUrl}
+            defaultValue: {value: newConfigValues.middleSchool}
         };
 
         // Publish the updated template
@@ -69,76 +122,83 @@ async function updateRemoteConfig(newMiddleSchoolUrl: string, newHighSchoolUrl: 
             });
     }
 
+    // There's nothing to do so return an empty Promise
     return Promise.resolve();
 }
 
+/// Firebase Functions
+
+/**
+ * Register the Scheduled Cloud Function
+ */
 exports.checkForNewTimetable = functions
     .region('europe-west1')
     .pubsub
-    .schedule('every 20 minutes')
+    .schedule('every 40 minutes')
     .onRun(async () => {
-        const text = await fetch(SITE_URL).then(data => data.text())
+        // Fetch and store the site as HTML
+        const html = await fetch(SITE_URL).then(data => data.text())
 
-        const dom = new JSDOM(text);
+        // Parse the HTML
+        const dom = new JSDOM(html);
         const doc = dom.window.document;
 
-        // Parse the HTML and get the urls
+        // Get the urls
+        // TODO: This part has to be changed if the website is changed!!!
         const middleSchoolUrl =
             doc.querySelector("li.menu-item-1320 a")!.getAttribute("href");
         const highSchoolUrl =
             doc.querySelector("li.menu-item-1470 a")!.getAttribute("href");
 
-        return updateRemoteConfig(SITE_URL + middleSchoolUrl, SITE_URL + highSchoolUrl);
+        const newConfigValues = new ConfigValues(
+            SITE_URL + highSchoolUrl,
+            SITE_URL + middleSchoolUrl
+        );
+        return updateRemoteConfig(newConfigValues);
     });
 
-const TITLES = [
-    "Der Stundenplan hat sich verändert!",
-    "Ein neuer Stundenplan ist da!",
-    "Achtung Stundenplanveränderung!",
-    "Der Stundenplan ist aktualisiert!",
-    "Neue Veränderungen im Stundenplan!"
-];
-const MESSAGES = [
-    "Yeah, I've got time",
-    "Happy Spooktober🎃",
-    "Are ya winning son?",
-    "Kowalski, Analysis!",
-    "Stay safe!",
-    "Hello There",
-    "You cannot handle the true power of Spinjitzu",
-    "Your timetable is temporary but Doom is Eternal",
-    "Hey, you, you're finally awake"
-];
-
+/**
+ * Register a listener for the Firebase Remote Config
+ *
+ * This function is called when the Remote Config is changed
+ */
 exports.sendNewTimetableNotification = functions
     .region('europe-west1')
     .remoteConfig
     .onUpdate(async (versionMetadata) => {
-        const config = admin.remoteConfig();
+        const config = admin.remoteConfig(); // Get Access to Firebase Remote Config
+
+        // Get both the current and the previous template
         const newTemplate = config.getTemplate();
         const oldTemplate = config.getTemplateAtVersion(versionMetadata.versionNumber - 1);
 
-        const selectedTitle = TITLES[randomInt(0, TITLES.length - 1)];
-        const selectedMessage = MESSAGES[randomInt(0, MESSAGES.length - 1)];
-
+        // Parse the templates
         const newValues = processRemoteConfigTemplate(await newTemplate);
         const oldValues = processRemoteConfigTemplate(await oldTemplate);
 
-        let preTitle = "";
-        let channel = CHANNEL_ID_DEFAULT;
+        let titlePrefix = "";
+        let channel = CHANNEL_ID_DEFAULT; // By default, send the notification to everyone
 
         if (oldValues.middleSchool === newValues.middleSchool && oldValues.highSchool !== newValues.highSchool) {
-            preTitle = "Lyzeum: ";
+            // Only the high school link has changed
+            titlePrefix = "Lyzeum: ";
             channel = CHANNEL_ID_HIGH_SCHOOL;
+
         } else if (oldValues.middleSchool !== newValues.middleSchool && oldValues.highSchool === newValues.highSchool) {
-            preTitle = "Gymnasium: ";
+            // Only the middle school link has changed
+            titlePrefix = "Gymnasium: ";
             channel = CHANNEL_ID_MIDDLE_SCHOOL;
+
         } else if (oldValues.middleSchool === newValues.middleSchool && oldValues.highSchool === newValues.highSchool)
-            return
+            return // None of the links have changed, do not send a notification
+
+        // Get a random title and message for the notification
+        const selectedTitle = TITLES[randomInt(0, TITLES.length - 1)];
+        const selectedMessage = MESSAGES[randomInt(0, MESSAGES.length - 1)];
 
         const payload = {
             data: {
-                title: preTitle + selectedTitle,
+                title: titlePrefix + selectedTitle,
                 body: selectedMessage,
                 channel_id: channel
             }
