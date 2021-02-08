@@ -1,12 +1,9 @@
 package net.theluckycoder.stundenplan.utils
 
 import android.content.Context
-import androidx.core.content.edit
-import androidx.datastore.createDataStore
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.createDataStore
-import androidx.datastore.preferences.edit
-import androidx.datastore.preferences.preferencesKey
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -40,7 +37,7 @@ class AppPreferences(context: Context) {
     companion object {
         private const val DATA_STORE_NAME = "user_prefs"
 
-        private val DARK_THEME = preferencesKey<Boolean>("dark_theme")
-        private val TIMETABLE_TYPE = preferencesKey<Boolean>("timetable_type")
+        private val DARK_THEME = booleanPreferencesKey("dark_theme")
+        private val TIMETABLE_TYPE = booleanPreferencesKey("timetable_type")
     }
 }

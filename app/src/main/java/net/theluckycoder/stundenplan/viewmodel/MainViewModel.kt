@@ -31,6 +31,9 @@ import net.theluckycoder.stundenplan.utils.app
 import net.theluckycoder.stundenplan.utils.getConfigKey
 import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * https://developer.android.com/jetpack/guide
+ */
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = MainRepository(app)

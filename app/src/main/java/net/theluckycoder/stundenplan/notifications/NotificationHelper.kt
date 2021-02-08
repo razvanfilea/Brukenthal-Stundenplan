@@ -1,4 +1,4 @@
-package net.theluckycoder.stundenplan.utils
+package net.theluckycoder.stundenplan.notifications
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -10,7 +10,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import net.theluckycoder.stundenplan.R
-import net.theluckycoder.stundenplan.service.FirebaseNotificationService
 
 object NotificationHelper {
 
@@ -72,6 +71,6 @@ object NotificationHelper {
             .build()
 
         NotificationManagerCompat.from(context)
-            .notify(FirebaseNotificationService.NOTIFICATION_ID, notification)
+            .notify(NotificationService.NOTIFICATION_ID, notification)
     }
 }

@@ -31,9 +31,8 @@ android {
         getByName("release") {
             addManifestPlaceholders(mapOf("firebaseDisabled" to false, "crashlyticsEnabled" to true))
 
-            isMinifyEnabled = true
+            minifyEnabled(true)
             isShrinkResources = true
-            isZipAlignEnabled = true
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -68,7 +67,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.kotlinCoroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:${Versions.kotlinCoroutines}")
 
-    implementation("androidx.core:core-ktx:1.5.0-beta01")
     implementation("androidx.appcompat:appcompat:1.2.0")
     implementation("com.google.android.material:material:1.3.0")
     implementation("androidx.activity:activity-ktx:1.1.0")

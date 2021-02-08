@@ -1,4 +1,4 @@
-package net.theluckycoder.stundenplan.service
+package net.theluckycoder.stundenplan.notifications
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
@@ -16,12 +16,13 @@ import kotlinx.coroutines.tasks.await
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.repository.MainRepository
 import net.theluckycoder.stundenplan.ui.MainActivity
-import net.theluckycoder.stundenplan.utils.NotificationHelper
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
-class FirebaseNotificationService : FirebaseMessagingService() {
+class NotificationService : FirebaseMessagingService() {
 
-    init {
+    override fun onCreate() {
+        super.onCreate()
+
         NotificationHelper.createNotificationChannels(this)
     }
 
