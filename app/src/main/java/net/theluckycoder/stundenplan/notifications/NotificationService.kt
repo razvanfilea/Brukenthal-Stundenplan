@@ -36,7 +36,7 @@ class NotificationService : FirebaseMessagingService() {
             val title = data["title"] ?: getString(R.string.app_name)
             val body = data["body"] ?: getString(R.string.new_timetable_notification)
             val url = data["url"]
-            val channelId = data["channel_id"] ?: NotificationHelper.CHANNEL_ID_DEFAULT
+            val channelId = data["channel_id"]
 
             val pendingIntent = if (url != null)
                 getUrlPendingIntent(url)

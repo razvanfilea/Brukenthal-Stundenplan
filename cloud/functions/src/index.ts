@@ -7,22 +7,20 @@ admin.initializeApp();
 
 /// Constants
 
-/**
- * The site itself
- */
 const SITE_URL = "https://brukenthal.ro";
 
 /**
- * The keys defined in the Firebase Console -> Remote Config, used to store the timetable URLs
+ * The keys defined in the Firebase Console -> Remote Config,
+ * used to access and store the timetable URLs
  */
 const KEY_HIGH_SCHOOL = "url_high_school";
 const KEY_MIDDLE_SCHOOL = "url_middle_school";
 
 /**
  * Channel IDs used for sending notifications
- * This need to be the same as in
+ * This need to be the same as in the 'NotificationService' Kotlin class
  */
-const CHANNEL_ID_DEFAULT = "default";
+const CHANNEL_ID_DEFAULT = "notifications";
 const CHANNEL_ID_HIGH_SCHOOL = "high_school";
 const CHANNEL_ID_MIDDLE_SCHOOL = "middle_school";
 

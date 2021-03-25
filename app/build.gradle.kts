@@ -27,6 +27,8 @@ android {
             isCrunchPngs = false
             extra.set("enableCrashlytics", false)
             extra.set("alwaysUpdateBuildId", false)
+
+            setApplicationIdSuffix(".debug")
         }
         getByName("release") {
             addManifestPlaceholders(mapOf("firebaseDisabled" to false, "crashlyticsEnabled" to true))
@@ -42,9 +44,7 @@ android {
     }
 
     bundle {
-        language {
-            enableSplit = false
-        }
+        language.enableSplit = false
     }
 
     compileOptions {
@@ -69,9 +69,9 @@ dependencies {
 
     implementation("androidx.appcompat:appcompat:1.2.0")
     implementation("com.google.android.material:material:1.3.0")
-    implementation("androidx.activity:activity-ktx:1.2.1")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:${Versions.androidxLifecycle}")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.androidxLifecycle}")
+    implementation("androidx.activity:activity-ktx:1.2.2")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
     implementation("androidx.datastore:datastore-preferences:1.0.0-alpha08")
 
     implementation(platform("com.google.firebase:firebase-bom:26.7.0"))

@@ -13,9 +13,9 @@ import net.theluckycoder.stundenplan.R
 
 object NotificationHelper {
 
-    const val CHANNEL_ID_DEFAULT = "notifications"
-    const val CHANNEL_ID_HIGH_SCHOOL = "high_school"
-    const val CHANNEL_ID_MIDDLE_SCHOOL = "middle_school"
+    private const val CHANNEL_ID_DEFAULT = "notifications"
+    private const val CHANNEL_ID_HIGH_SCHOOL = "high_school"
+    private const val CHANNEL_ID_MIDDLE_SCHOOL = "middle_school"
 
     private val channelIds = listOf(CHANNEL_ID_DEFAULT, CHANNEL_ID_HIGH_SCHOOL, CHANNEL_ID_MIDDLE_SCHOOL)
 
@@ -55,12 +55,12 @@ object NotificationHelper {
         title: String,
         text: String,
         pendingIntent: PendingIntent,
-        channelId: String
+        channelId: String?
     ) {
-        require(channelIds.contains(channelId))
+        val channel = channelId?.takeIf { channelIds.contains(channelId) } ?: CHANNEL_ID_DEFAULT
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val notification = NotificationCompat.Builder(context, channelId)
+        val notification = NotificationCompat.Builder(context, channel)
             .setContentTitle(title)
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_notification)
