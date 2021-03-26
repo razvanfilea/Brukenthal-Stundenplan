@@ -74,7 +74,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
     implementation("androidx.datastore:datastore-preferences:1.0.0-alpha08")
 
-    implementation(platform("com.google.firebase:firebase-bom:26.7.0"))
+    implementation(platform("com.google.firebase:firebase-bom:26.8.0"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-config-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
