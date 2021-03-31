@@ -2,6 +2,9 @@ package net.theluckycoder.stundenplan.repository
 
 import android.content.Context
 import androidx.core.net.toUri
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.ktx.get
+import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.tonyodev.fetch2.AbstractFetchListener
 import com.tonyodev.fetch2.Download
 import com.tonyodev.fetch2.Error
@@ -14,8 +17,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import net.theluckycoder.stundenplan.R
-import net.theluckycoder.stundenplan.TimetableType
+import net.theluckycoder.stundenplan.model.Timetable
+import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.utils.FirebaseConstants
 import net.theluckycoder.stundenplan.utils.NetworkResult
 import net.theluckycoder.stundenplan.utils.getConfigKey
@@ -23,26 +28,43 @@ import java.io.File
 
 class MainRepository(private val context: Context) {
 
-    private fun getNewFile(timetableType: TimetableType): File {
-        val dir = File(context.cacheDir, timetableType.getConfigKey())
+    private fun getNewFile(timetable: Timetable): File {
+        val dir = File(context.cacheDir, timetable.type.getConfigKey())
         dir.mkdirs()
 
-        val minutes = System.currentTimeMillis() / 1000 / 60
-        return File(dir, "$minutes.pdf")
+        val name = timetable.url.substringAfterLast('/')
+
+        return File(dir, name)
+    }
+
+    fun doesFileExist(timetable: Timetable): Boolean {
+        return File(
+            File(context.cacheDir, timetable.type.getConfigKey()),
+            timetable.url.substringAfter('/')
+        ).exists()
+    }
+
+    suspend fun getTimetable(timetableType: TimetableType): Timetable {
+        val remoteConfig = Firebase.remoteConfig
+
+        remoteConfig.fetchAndActivate().await()
+        val pdfUrl = remoteConfig[timetableType.getConfigKey()].asString()
+
+        return Timetable(timetableType, pdfUrl)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun downloadPdf(timetableType: TimetableType, url: String) = callbackFlow<NetworkResult> {
-        val file = getNewFile(timetableType).toUri()
+    suspend fun downloadPdf(timetable: Timetable) = callbackFlow<NetworkResult> {
+        val file = getNewFile(timetable).toUri()
 
-        val request = Request(url, file).apply {
+        val request = Request(timetable.url, file).apply {
             priority = Priority.HIGH
             networkType = NetworkType.ALL
         }
 
         val listener = object : AbstractFetchListener() {
             override fun onCancelled(download: Download) {
-                sendBlocking(NetworkResult.Failed(R.string.error_download_failed))
+                sendBlocking(NetworkResult.Failed(NetworkResult.FailReason.DownloadFailed))
                 close()
             }
 
@@ -52,7 +74,7 @@ class MainRepository(private val context: Context) {
             }
 
             override fun onError(download: Download, error: Error, throwable: Throwable?) {
-                sendBlocking(NetworkResult.Failed(R.string.error_download_failed))
+                sendBlocking(NetworkResult.Failed(NetworkResult.FailReason.DownloadFailed))
                 close()
             }
 
@@ -69,11 +91,7 @@ class MainRepository(private val context: Context) {
             }
         }
 
-        val fetch = Fetch.getInstance(
-            FetchConfiguration.Builder(context)
-                .setDownloadConcurrentLimit(3)
-                .build()
-        )
+        val fetch = Fetch.getInstance(FetchConfiguration.Builder(context).build())
 
         fetch.addListener(listener)
         fetch.enqueue(request, { }) { error -> error.throwable?.let { throw it } }
@@ -94,7 +112,7 @@ class MainRepository(private val context: Context) {
 
         return files.asSequence()
             .filterNotNull()
-            .sortedDescending()
+            .sortedByDescending { it.lastModified() }
             .firstOrNull()
     }
 

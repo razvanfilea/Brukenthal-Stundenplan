@@ -5,18 +5,27 @@
     <string name="high_school">High School</string>
     <string name="middle_school">Middle School</string>
 
+    <!-- Actions -->
     <string name="action_switch_theme">Switch Theme</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_retry">Retry</string>
     <string name="action_switch_to_high_school">Switch to High School</string>
     <string name="action_switch_to_middle_school">Switch to Middle School</string>
+    <string name="action_update">Update</string>
+    <string name="action_ignore">Ignore</string>
 
+    <!-- Errors -->
     <string name="error_network_connection">No internet connection!</string>
     <string name="error_download_failed">Failed to download Timetable</string>
     <string name="error_rendering_failed">Could not display Timetable</string>
 
+    <!-- Notifications -->
     <string name="notifications_channel_default">Notifications</string>
     <string name="notifications_channel_high_school">High School Notifications</string>
     <string name="notifications_channel_middle_school">Middle School Notifications</string>
     <string name="new_timetable_notification">New Timetable!</string>
+
+    <!-- Update -->
+    <string name="update_available">Update Available</string>
+    <string name="update_available_desc">A new update for Brukplan is available</string>
 </resources>

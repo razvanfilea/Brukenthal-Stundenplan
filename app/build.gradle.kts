@@ -18,24 +18,30 @@ android {
         versionName(Versions.App.versionName)
 
         resConfigs("en", "de")
+
+        addManifestPlaceholders(mapOf("firebaseDisabled" to true, "crashlyticsEnabled" to false))
     }
 
     buildTypes {
         getByName("debug") {
-            addManifestPlaceholders(mapOf("firebaseDisabled" to true, "crashlyticsEnabled" to false))
-
             isCrunchPngs = false
             extra.set("enableCrashlytics", false)
             extra.set("alwaysUpdateBuildId", false)
+        }
+        create("staging") {
+            initWith(buildTypes.getByName("release"))
+            versionNameSuffix("-staging")
 
-            setApplicationIdSuffix(".debug")
+            debuggable(true)
+            proguardFiles("proguard-rules.pro")
+
+            signingConfig = signingConfigs.getByName("debug")
         }
         getByName("release") {
             addManifestPlaceholders(mapOf("firebaseDisabled" to false, "crashlyticsEnabled" to true))
 
             minifyEnabled(true)
             isShrinkResources = true
-
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

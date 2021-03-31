@@ -4,6 +4,13 @@ import android.net.Uri
 
 sealed class NetworkResult {
     class Success(val fileUri: Uri) : NetworkResult()
+
     class Loading(val indeterminate: Boolean, val progress: Int) : NetworkResult()
-    class Failed(val reasonStringRes: Int) : NetworkResult()
+
+    class Failed(val reason: FailReason) : NetworkResult()
+
+    enum class FailReason {
+        MissingNetworkConnection,
+        DownloadFailed,
+    }
 }

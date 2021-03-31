@@ -7,7 +7,7 @@
     tools:context=".ui.MainActivity">
 
     <com.github.barteksc.pdfviewer.PDFView
-        android:id="@+id/viewer"
+        android:id="@+id/pdf_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -17,15 +17,30 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/color_primary_transparent"
         android:theme="?attr/actionBarTheme"
-        app:subtitle="@string/high_school"
         app:title="@string/activity_title"
         app:titleTextColor="@color/white" />
 
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
+    <LinearLayout
+        android:id="@+id/layout_bottom"
         android:layout_width="match_parent"
-        android:layout_height="16dp"
-        android:layout_gravity="bottom" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical">
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:layout_gravity="bottom" />
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:itemIconSize="0dp"
+            app:menu="@menu/bottom_app_bar" />
+
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -6,18 +6,24 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.github.barteksc.pdfviewer.util.FitPolicy
 import com.google.android.material.snackbar.Snackbar
-import net.theluckycoder.stundenplan.viewmodel.MainViewModel
+import net.theluckycoder.stundenplan.BuildConfig
 import net.theluckycoder.stundenplan.R
-import net.theluckycoder.stundenplan.TimetableType
-import net.theluckycoder.stundenplan.utils.NetworkResult
 import net.theluckycoder.stundenplan.databinding.MainActivityBinding
+import net.theluckycoder.stundenplan.extensions.browseUrl
+import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.utils.Analytics
+import net.theluckycoder.stundenplan.utils.NetworkResult
+import net.theluckycoder.stundenplan.utils.UpdateChecker
+import net.theluckycoder.stundenplan.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,8 +31,24 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: MainActivityBinding
 
     private var isToolbarVisible = true
-    private var timetableType: TimetableType? = null
     private var useDarkTheme = true
+
+    init {
+        // Ensure that the proper timetable is selected in the BottomNavigationView
+        lifecycleScope.launchWhenStarted {
+            binding.bottomBar.selectedItemId = when (viewModel.timetableType()) {
+                TimetableType.HIGH_SCHOOL -> R.id.nav_high_school
+                TimetableType.MIDDLE_SCHOOL -> R.id.nav_middle_school
+            }
+        }
+
+        lifecycleScope.launchWhenResumed {
+            if (!viewModel.hasSeenUpdateDialog) {
+                showUpdateDialog()
+                viewModel.hasSeenUpdateDialog = true
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,19 +57,21 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        binding.viewer.maxZoom = 6f
-        binding.viewer.setNightMode(useDarkTheme)
-        binding.viewer.setOnClickListener {
+        binding.pdfView.maxZoom = 6f
+        binding.pdfView.setOnClickListener {
+            isToolbarVisible = !isToolbarVisible
+
             supportActionBar?.let {
-                TransitionManager.beginDelayedTransition(binding.root, Slide(Gravity.TOP))
+                TransitionManager.beginDelayedTransition(binding.toolbar, Slide(Gravity.TOP))
 
-                if (isToolbarVisible) it.hide() else it.show()
-
-                isToolbarVisible = !isToolbarVisible
+                if (isToolbarVisible) it.show() else it.hide()
             }
+
+            TransitionManager.beginDelayedTransition(binding.bottomBar, Slide(Gravity.BOTTOM))
+            binding.bottomBar.isVisible = isToolbarVisible
         }
 
-        viewModel.getStateLiveData().observe(this) { result ->
+        viewModel.networkState.observe(this) { result ->
             when (result) {
                 is NetworkResult.Success -> {
                     hideProgressBar()
@@ -62,42 +86,35 @@ class MainActivity : AppCompatActivity() {
                 }
                 is NetworkResult.Failed -> {
                     hideProgressBar()
-                    makeErrorSnackbar(result.reasonStringRes)
-                        .setAction(R.string.action_retry) {
-                            viewModel.refresh(timetableType!!)
-                        }
+
+                    val reasonStringRes = when (result.reason) {
+                        NetworkResult.FailReason.MissingNetworkConnection -> R.string.error_network_connection
+                        NetworkResult.FailReason.DownloadFailed -> R.string.error_download_failed
+                    }
+
+                    makeErrorSnackbar(reasonStringRes)
+                        .setAction(R.string.action_retry) { viewModel.refresh(force = true) }
                         .show()
                 }
             }
         }
 
-        viewModel.darkThemeData.observe(this, { darkTheme ->
-            if (useDarkTheme != darkTheme) {
-                useDarkTheme = darkTheme
+        viewModel.darkTheme.observe(this, { darkTheme ->
+            useDarkTheme = darkTheme
 
-                with(binding.viewer) {
-                    setNightMode(darkTheme)
-                    loadPages()
-                }
+            with(binding.pdfView) {
+                setNightMode(darkTheme)
+                loadPages()
             }
         })
 
-        viewModel.timetableTypeData.observe(this, {
-            // Load last file first, then attempt to download a new one
-            // Since it's very likely that the last downloaded PDF is also the most recent one
-            if (timetableType == null)
-                viewModel.preload(it)
-
-            if (timetableType != it) {
-                timetableType = it
-                supportActionBar?.subtitle =
-                    getString(if (it == TimetableType.HIGH_SCHOOL) R.string.high_school else R.string.middle_school)
-
-                invalidateOptionsMenu()
-
-                viewModel.refresh(it)
+        binding.bottomBar.setOnNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.nav_high_school -> viewModel.switchTimetableType(TimetableType.HIGH_SCHOOL)
+                R.id.nav_middle_school -> viewModel.switchTimetableType(TimetableType.MIDDLE_SCHOOL)
             }
-        })
+            true
+        }
 
         if (intent.getBooleanExtra(ARG_OPENED_FROM_NOTIFICATION, false))
             Analytics.openNotificationEvent()
@@ -108,21 +125,9 @@ class MainActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.action_switch_to_high_school)
-            .isVisible = timetableType != TimetableType.HIGH_SCHOOL
-        menu.findItem(R.id.action_switch_to_middle_school)
-            .isVisible = timetableType != TimetableType.MIDDLE_SCHOOL
-
-        return super.onPrepareOptionsMenu(menu)
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_switch_theme -> viewModel.switchTheme(!useDarkTheme)
-            R.id.action_refresh -> viewModel.refresh(timetableType!!)
-            R.id.action_switch_to_high_school -> viewModel.switchTimetableType(TimetableType.HIGH_SCHOOL)
-            R.id.action_switch_to_middle_school -> viewModel.switchTimetableType(TimetableType.MIDDLE_SCHOOL)
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -135,13 +140,10 @@ class MainActivity : AppCompatActivity() {
             .setBackgroundTint(ContextCompat.getColor(this, R.color.red_800))
 
     private fun displayPdf(result: NetworkResult.Success) {
-        binding.viewer.fromUri(result.fileUri)
+        binding.pdfView.fromUri(result.fileUri)
             .enableSwipe(true)
             .swipeHorizontal(false)
             .enableDoubletap(true)
-            .onError {
-                makeErrorSnackbar(R.string.error_rendering_failed).show()
-            }
             .enableAntialiasing(true)
             .pageFitPolicy(FitPolicy.WIDTH) // mode to fit pages in the view
             .nightMode(useDarkTheme)
@@ -162,7 +164,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showUpdateDialog() {
+        UpdateChecker {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.update_available)
+                .setMessage(R.string.update_available_desc)
+                .setPositiveButton(R.string.action_update) { _, _ ->
+                    browseUrl(APP_STORE_URL)
+                }
+                .setNegativeButton(R.string.action_ignore, null)
+                .show()
+        }
+    }
+
     companion object {
         const val ARG_OPENED_FROM_NOTIFICATION = "opened_from_notification"
+        private const val APP_STORE_URL =
+            "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
     }
 }

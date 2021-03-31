@@ -47,7 +47,7 @@
       "client_info": {
         "mobilesdk_app_id": "FAKEfakeFAKE",
         "android_client_info": {
-          "package_name": "net.theluckycoder.stundenplan.debug"
+          "package_name": "net.theluckycoder.stundenplan"
         }
       },
       "oauth_client": [
@@ -55,7 +55,7 @@
           "client_id": "FAKEfakeFAKE",
           "client_type": 1,
           "android_info": {
-            "package_name": "net.theluckycoder.stundenplan.debug",
+            "package_name": "net.theluckycoder.stundenplan",
             "certificate_hash": "FAKEfakeFAKE"
           }
         },

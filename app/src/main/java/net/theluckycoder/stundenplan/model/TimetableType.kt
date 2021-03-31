@@ -1,4 +1,4 @@
-package net.theluckycoder.stundenplan
+package net.theluckycoder.stundenplan.model
 
 enum class TimetableType {
     HIGH_SCHOOL,

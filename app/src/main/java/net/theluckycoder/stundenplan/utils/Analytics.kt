@@ -3,7 +3,7 @@ package net.theluckycoder.stundenplan.utils
 import android.os.Bundle
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
-import net.theluckycoder.stundenplan.TimetableType
+import net.theluckycoder.stundenplan.model.TimetableType
 
 object Analytics {
 

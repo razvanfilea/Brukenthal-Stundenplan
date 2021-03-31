@@ -10,26 +10,18 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
-import com.google.firebase.remoteconfig.ktx.get
-import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.tonyodev.fetch2core.isNetworkAvailable
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 import net.theluckycoder.stundenplan.BuildConfig
-import net.theluckycoder.stundenplan.R
-import net.theluckycoder.stundenplan.TimetableType
+import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.repository.MainRepository
-import net.theluckycoder.stundenplan.utils.Analytics
 import net.theluckycoder.stundenplan.utils.AppPreferences
 import net.theluckycoder.stundenplan.utils.FirebaseConstants
 import net.theluckycoder.stundenplan.utils.NetworkResult
-import net.theluckycoder.stundenplan.utils.app
-import net.theluckycoder.stundenplan.utils.getConfigKey
-import java.util.concurrent.atomic.AtomicBoolean
+import net.theluckycoder.stundenplan.extensions.app
 
 /**
  * https://developer.android.com/jetpack/guide
@@ -38,78 +30,95 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = MainRepository(app)
     private val preferences = AppPreferences(app)
-    private val isDownloading = AtomicBoolean(false)
 
     private val stateData = MutableLiveData<NetworkResult>()
+    private var downloadJob: Job? = null
 
-    val darkThemeData = preferences.darkThemeFlow.asLiveData()
-    val timetableTypeData = preferences.timetableTypeFlow.asLiveData()
+    val darkTheme = preferences.darkThemeFlow.asLiveData()
+    val networkState: LiveData<NetworkResult> get() = stateData
+
+    var hasSeenUpdateDialog = false
 
     init {
         try {
-            subscribeToFirebase()
+            subscribeToFirebaseTopics()
         } catch (e: Exception) {
             e.printStackTrace()
         }
-    }
 
-    fun getStateLiveData(): LiveData<NetworkResult> = stateData
+        viewModelScope.launch {
+            preferences.timetableTypeFlow.collectLatest {
+                ensureActive()
+                refresh(it)
+            }
+        }
+    }
 
     fun switchTheme(useDarkTheme: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         preferences.updateUseDarkTheme(useDarkTheme)
     }
 
-    fun switchTimetableType(newTimetableType: TimetableType) = viewModelScope.launch(Dispatchers.IO) {
-        preferences.updateTimetableType(newTimetableType)
-    }
+    fun switchTimetableType(newTimetableType: TimetableType) =
+        viewModelScope.launch(Dispatchers.IO) {
+            preferences.updateTimetableType(newTimetableType)
+        }
 
-    fun preload(timetableType: TimetableType) = viewModelScope.launch {
+    suspend fun timetableType(): TimetableType = preferences.timetableType()
+
+    private fun loadLastTimetable(timetableType: TimetableType) = viewModelScope.launch {
         val fileUri = withContext(Dispatchers.IO) { repository.getLastFile(timetableType)?.toUri() }
 
         if (fileUri != null)
-            NetworkResult.Success(fileUri)
+            stateData.value = NetworkResult.Success(fileUri)
     }
 
-    fun refresh(timetableType: TimetableType) = viewModelScope.launch {
-        if (!app.isNetworkAvailable()) {
-            stateData.value = NetworkResult.Failed(R.string.error_network_connection)
-            return@launch
-        }
+    fun refresh(timetableType: TimetableType? = null, force: Boolean = false) =
+        viewModelScope.launch {
+            downloadJob?.cancelAndJoin()
 
-        if (isDownloading.get())
-            return@launch
+            downloadJob = viewModelScope.launch {
+                val type =
+                    timetableType ?: withContext(Dispatchers.IO) { preferences.timetableType() }
 
-        Analytics.refreshEvent(timetableType)
+                val isNetworkAvailable = app.isNetworkAvailable()
+                val preloadJob = loadLastTimetable(type)
 
-        isDownloading.set(true)
+                if (isNetworkAvailable) {
+                    // Let the user know that we are starting to download a new timetable
+                    stateData.value = NetworkResult.Loading(true, 0)
 
-        stateData.value = NetworkResult.Loading(true, 0)
+                    try {
+                        val timetable = repository.getTimetable(type)
+                        check(timetable.url.isNotBlank()) { "No PDF url link found" }
+                        Log.i(PDF_TAG, "Url: ${timetable.url}")
 
-        try {
-            val remoteConfig = Firebase.remoteConfig
+                        // Show the pre-existing PDF before
+                        preloadJob.join()
 
-            val successful = remoteConfig.fetchAndActivate().await()
-            if (!successful)
-                Log.i(PDF_TAG, "Remote Config fetch not successful")
+                        if (force || !repository.doesFileExist(timetable)) {
+                            repository.downloadPdf(timetable)
+                                .flowOn(Dispatchers.IO)
+                                .collect { networkResult ->
+                                    ensureActive()
+                                    stateData.postValue(networkResult)
+                                }
+                        }
 
-            val pdfUrl = remoteConfig[timetableType.getConfigKey()].asString()
-            check(pdfUrl.isNotBlank())
-            Log.i(PDF_TAG, "Url: $pdfUrl")
+                        Log.i(PDF_TAG, "Finished downloading")
+                    } catch (e: Exception) {
+                        stateData.value = NetworkResult.Failed(NetworkResult.FailReason.DownloadFailed)
+                        Log.e(PDF_TAG, "Failed to download", e)
+                    }
+                } else {
+                    preloadJob.join() // Only load the last downloaded one
 
-            repository.downloadPdf(timetableType, pdfUrl).flowOn(Dispatchers.IO).collect {
-                stateData.value = it
+                    // Let the user know that we can't download a newer timetable
+                    stateData.value = NetworkResult.Failed(NetworkResult.FailReason.MissingNetworkConnection)
+                }
             }
-
-            Log.i(PDF_TAG, "Finished Loading")
-        } catch (e: Exception) {
-            stateData.value = NetworkResult.Failed(R.string.error_download_failed)
-            Log.e(PDF_TAG, "Failed to download", e)
         }
 
-        isDownloading.set(false)
-    }
-
-    private fun subscribeToFirebase() {
+    private fun subscribeToFirebaseTopics() {
         with(Firebase.messaging) {
             subscribeToTopic(FirebaseConstants.TOPIC_ALL)
 

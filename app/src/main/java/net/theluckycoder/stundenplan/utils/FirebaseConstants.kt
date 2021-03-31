@@ -1,6 +1,6 @@
 package net.theluckycoder.stundenplan.utils
 
-import net.theluckycoder.stundenplan.TimetableType
+import net.theluckycoder.stundenplan.model.TimetableType
 
 object FirebaseConstants {
     const val KEY_HIGH_SCHOOL = "url_high_school"
