@@ -8,39 +8,38 @@ plugins {
 }
 
 android {
-    compileSdkVersion(Versions.Sdk.compile)
+    compileSdk = Versions.Sdk.compile
 
     defaultConfig {
-        applicationId("net.theluckycoder.stundenplan")
-        minSdkVersion(Versions.Sdk.min)
-        targetSdkVersion(Versions.Sdk.target)
-        versionCode(Versions.App.versionCode)
-        versionName(Versions.App.versionName)
+        applicationId = "net.theluckycoder.stundenplan"
+        minSdk = Versions.Sdk.min
+        targetSdk = Versions.Sdk.target
+        versionCode = Versions.App.versionCode
+        versionName = Versions.App.versionName
 
-        resConfigs("en", "de")
+        resourceConfigurations += listOf("en", "de", "ro")
 
         addManifestPlaceholders(mapOf("firebaseDisabled" to true, "crashlyticsEnabled" to false))
     }
 
     buildTypes {
         getByName("debug") {
-            isCrunchPngs = false
             extra.set("enableCrashlytics", false)
             extra.set("alwaysUpdateBuildId", false)
         }
         create("staging") {
-            initWith(buildTypes.getByName("release"))
+            initWith(buildTypes.getByName("debug"))
             versionNameSuffix("-staging")
 
             debuggable(true)
-            proguardFiles("proguard-rules.pro")
 
             signingConfig = signingConfigs.getByName("debug")
         }
         getByName("release") {
             addManifestPlaceholders(mapOf("firebaseDisabled" to false, "crashlyticsEnabled" to true))
 
-            minifyEnabled(true)
+            isMinifyEnabled = true
+
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -53,19 +52,11 @@ android {
         language.enableSplit = false
     }
 
-    compileOptions {
-        sourceCompatibility(JavaVersion.VERSION_1_8)
-        targetCompatibility(JavaVersion.VERSION_1_8)
-    }
-
     kotlinOptions {
-        jvmTarget = "1.8"
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 
-    buildFeatures {
-        viewBinding = true
-    }
+    buildFeatures.viewBinding = true
 }
 
 dependencies {
@@ -80,7 +71,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
     implementation("androidx.datastore:datastore-preferences:1.0.0-beta01")
 
-    implementation(platform("com.google.firebase:firebase-bom:28.0.0"))
+    implementation(platform("com.google.firebase:firebase-bom:28.0.1"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-config-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")

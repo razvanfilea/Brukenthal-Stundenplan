@@ -9,6 +9,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.firebase.remoteconfig.ktx.remoteConfig
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -50,6 +51,7 @@ class NotificationService : FirebaseMessagingService() {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun updateRemoteConfig() = GlobalScope.launch(Dispatchers.IO) {
         val remoteConfig = Firebase.remoteConfig
 
@@ -65,6 +67,7 @@ class NotificationService : FirebaseMessagingService() {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun cleanCacheDir() {
         val appContext = applicationContext
 

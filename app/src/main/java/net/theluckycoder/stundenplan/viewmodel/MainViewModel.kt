@@ -4,17 +4,13 @@ import android.app.Application
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import com.tonyodev.fetch2core.isNetworkAvailable
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
 import net.theluckycoder.stundenplan.BuildConfig
 import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.repository.MainRepository
@@ -31,11 +27,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = MainRepository(app)
     private val preferences = AppPreferences(app)
 
-    private val stateData = MutableLiveData<NetworkResult>()
+    private val networkStateFlow = MutableStateFlow<NetworkResult?>(null)
     private var downloadJob: Job? = null
 
     val darkTheme = preferences.darkThemeFlow.asLiveData()
-    val networkState: LiveData<NetworkResult> get() = stateData
+    val networkState: StateFlow<NetworkResult?> = networkStateFlow
 
     var hasSeenUpdateDialog = false
 
@@ -65,12 +61,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     suspend fun timetableType(): TimetableType = preferences.timetableType()
 
-    private fun loadLastTimetable(timetableType: TimetableType) = viewModelScope.launch {
-        val fileUri = withContext(Dispatchers.IO) { repository.getLastFile(timetableType)?.toUri() }
+    private fun loadLastTimetable(timetableType: TimetableType) =
+        viewModelScope.launch(Dispatchers.IO) {
+            val fileUri = repository.getLastFile(timetableType)?.toUri()
 
-        if (fileUri != null)
-            stateData.value = NetworkResult.Success(fileUri)
-    }
+            if (fileUri != null)
+                networkStateFlow.value = NetworkResult.Success(fileUri)
+        }
 
     fun refresh(timetableType: TimetableType? = null, force: Boolean = false) =
         viewModelScope.launch {
@@ -85,7 +82,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 if (isNetworkAvailable) {
                     // Let the user know that we are starting to download a new timetable
-                    stateData.value = NetworkResult.Loading(true, 0)
+                    networkStateFlow.value = NetworkResult.Loading(true, 0)
 
                     try {
                         val timetable = repository.getTimetable(type)
@@ -100,20 +97,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                 .flowOn(Dispatchers.IO)
                                 .collect { networkResult ->
                                     ensureActive()
-                                    stateData.postValue(networkResult)
+                                    networkStateFlow.value = networkResult
                                 }
                         }
 
                         Log.i(PDF_TAG, "Finished downloading")
                     } catch (e: Exception) {
-                        stateData.value = NetworkResult.Failed(NetworkResult.FailReason.DownloadFailed)
+                        networkStateFlow.value =
+                            NetworkResult.Failed(NetworkResult.FailReason.DownloadFailed)
                         Log.e(PDF_TAG, "Failed to download", e)
                     }
                 } else {
                     preloadJob.join() // Only load the last downloaded one
 
                     // Let the user know that we can't download a newer timetable
-                    stateData.value = NetworkResult.Failed(NetworkResult.FailReason.MissingNetworkConnection)
+                    networkStateFlow.value =
+                        NetworkResult.Failed(NetworkResult.FailReason.MissingNetworkConnection)
                 }
             }
         }

@@ -15,6 +15,8 @@ import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.github.barteksc.pdfviewer.util.FitPolicy
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.collect
 import net.theluckycoder.stundenplan.BuildConfig
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.databinding.MainActivityBinding
@@ -34,6 +36,38 @@ class MainActivity : AppCompatActivity() {
     private var useDarkTheme = true
 
     init {
+        lifecycleScope.launchWhenStarted {
+            viewModel.networkState.collect { result ->
+                ensureActive()
+
+                when (result) {
+                    is NetworkResult.Success -> {
+                        hideProgressBar()
+                        displayPdf(result)
+                    }
+                    is NetworkResult.Loading -> {
+                        with(binding.progressBar) {
+                            isIndeterminate = result.indeterminate
+                            progress = result.progress
+                        }
+                        showProgressBar()
+                    }
+                    is NetworkResult.Failed -> {
+                        hideProgressBar()
+
+                        val reasonStringRes = when (result.reason) {
+                            NetworkResult.FailReason.MissingNetworkConnection -> R.string.error_network_connection
+                            NetworkResult.FailReason.DownloadFailed -> R.string.error_download_failed
+                        }
+
+                        makeErrorSnackbar(reasonStringRes)
+                            .setAction(R.string.action_retry) { viewModel.refresh(force = true) }
+                            .show()
+                    }
+                }
+            }
+        }
+
         // Ensure that the proper timetable is selected in the BottomNavigationView
         lifecycleScope.launchWhenStarted {
             binding.bottomBar.selectedItemId = when (viewModel.timetableType()) {
@@ -69,34 +103,6 @@ class MainActivity : AppCompatActivity() {
 
             TransitionManager.beginDelayedTransition(binding.bottomBar, Slide(Gravity.BOTTOM))
             binding.bottomBar.isVisible = isToolbarVisible
-        }
-
-        viewModel.networkState.observe(this) { result ->
-            when (result) {
-                is NetworkResult.Success -> {
-                    hideProgressBar()
-                    displayPdf(result)
-                }
-                is NetworkResult.Loading -> {
-                    with(binding.progressBar) {
-                        isIndeterminate = result.indeterminate
-                        progress = result.progress
-                    }
-                    showProgressBar()
-                }
-                is NetworkResult.Failed -> {
-                    hideProgressBar()
-
-                    val reasonStringRes = when (result.reason) {
-                        NetworkResult.FailReason.MissingNetworkConnection -> R.string.error_network_connection
-                        NetworkResult.FailReason.DownloadFailed -> R.string.error_download_failed
-                    }
-
-                    makeErrorSnackbar(reasonStringRes)
-                        .setAction(R.string.action_retry) { viewModel.refresh(force = true) }
-                        .show()
-                }
-            }
         }
 
         viewModel.darkTheme.observe(this, { darkTheme ->
@@ -135,6 +141,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun makeErrorSnackbar(stringRes: Int) =
         Snackbar.make(binding.root, stringRes, Snackbar.LENGTH_LONG)
+            .setAnchorView(binding.bottomBar)
             .setTextColor(ContextCompat.getColor(this, R.color.white))
             .setActionTextColor(ContextCompat.getColor(this, R.color.white))
             .setBackgroundTint(ContextCompat.getColor(this, R.color.red_800))

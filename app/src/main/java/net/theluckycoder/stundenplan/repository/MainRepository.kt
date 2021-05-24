@@ -15,7 +15,7 @@ import com.tonyodev.fetch2.Priority
 import com.tonyodev.fetch2.Request
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import net.theluckycoder.stundenplan.R
@@ -64,22 +64,26 @@ class MainRepository(private val context: Context) {
 
         val listener = object : AbstractFetchListener() {
             override fun onCancelled(download: Download) {
-                sendBlocking(NetworkResult.Failed(NetworkResult.FailReason.DownloadFailed))
+                trySendBlocking(NetworkResult.Failed(NetworkResult.FailReason.DownloadFailed))
                 close()
             }
 
             override fun onCompleted(download: Download) {
-                sendBlocking(NetworkResult.Success(download.fileUri))
+                trySendBlocking(NetworkResult.Success(download.fileUri))
                 close()
             }
 
             override fun onError(download: Download, error: Error, throwable: Throwable?) {
-                sendBlocking(NetworkResult.Failed(NetworkResult.FailReason.DownloadFailed))
+                trySendBlocking(NetworkResult.Failed(NetworkResult.FailReason.DownloadFailed))
                 close()
             }
 
-            override fun onProgress(download: Download, etaInMilliSeconds: Long, downloadedBytesPerSecond: Long) {
-                sendBlocking(NetworkResult.Loading(false, download.progress))
+            override fun onProgress(
+                download: Download,
+                etaInMilliSeconds: Long,
+                downloadedBytesPerSecond: Long
+            ) {
+                trySendBlocking(NetworkResult.Loading(false, download.progress))
             }
 
             override fun onRemoved(download: Download) {
@@ -94,7 +98,10 @@ class MainRepository(private val context: Context) {
         val fetch = Fetch.getInstance(FetchConfiguration.Builder(context).build())
 
         fetch.addListener(listener)
-        fetch.enqueue(request, { }) { error -> error.throwable?.let { throw it } }
+        fetch.enqueue(
+            request = request,
+            func = { },
+            func2 = { error -> error.throwable?.let { throw it } })
 
         awaitClose {
             fetch.removeListener(listener)

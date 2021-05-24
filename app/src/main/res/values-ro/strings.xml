@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="activity_title">Orar Brukenthal</string>
+    <string name="high_school">Liceu</string>
+    <string name="middle_school">Gimnaziu</string>
+
+    <!-- Actions -->
+    <string name="action_switch_theme">Schimbă tema</string>
+    <string name="action_refresh">Reîmprospătează</string>
+    <string name="action_retry">Reîncearcă</string>
+    <string name="action_update">Actualizează</string>
+    <string name="action_ignore">Ignoră</string>
+
+    <!-- Errors -->
+    <string name="error_network_connection">No internet connection!</string>
+    <string name="error_download_failed">Nu s-a putut descărca orarul</string>
+    <string name="error_rendering_failed">Nu s-a putut afișa orarul</string>
+
+    <!-- Notifications -->
+    <string name="notifications_channel_default">Notificări</string>
+    <string name="notifications_channel_high_school">Notificări de la liceu</string>
+    <string name="notifications_channel_middle_school">Notificări de la gimnaziu</string>
+    <string name="new_timetable_notification">Orar nou!</string>
+
+    <!-- Update -->
+    <string name="update_available">Actualizăre disponibilă</string>
+    <string name="update_available_desc">O actualizare nouă e disponibilă pentru Brukplan</string>
+</resources>
