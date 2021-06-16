@@ -69,7 +69,7 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.2.3")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
-    implementation("androidx.datastore:datastore-preferences:1.0.0-beta01")
+    implementation("androidx.datastore:datastore-preferences:1.0.0-beta02")
 
     implementation(platform("com.google.firebase:firebase-bom:28.1.0"))
     implementation("com.google.firebase:firebase-analytics-ktx")
