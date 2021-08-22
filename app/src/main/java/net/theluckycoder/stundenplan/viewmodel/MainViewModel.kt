@@ -69,53 +69,57 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 networkStateFlow.value = NetworkResult.Success(fileUri)
         }
 
-    fun refresh(timetableType: TimetableType? = null, force: Boolean = false) =
-        viewModelScope.launch {
-            downloadJob?.cancelAndJoin()
+    fun refresh(
+        timetableType: TimetableType? = null,
+        force: Boolean = false
+    ) = viewModelScope.launch {
+        downloadJob?.cancelAndJoin()
 
-            downloadJob = viewModelScope.launch {
-                val type =
-                    timetableType ?: withContext(Dispatchers.IO) { preferences.timetableType() }
+        downloadJob = viewModelScope.launch {
+            val type =
+                timetableType ?: withContext(Dispatchers.IO) { preferences.timetableType() }
 
-                val isNetworkAvailable = app.isNetworkAvailable()
-                val preloadJob = loadLastTimetable(type)
+            ensureActive()
 
-                if (isNetworkAvailable) {
-                    // Let the user know that we are starting to download a new timetable
-                    networkStateFlow.value = NetworkResult.Loading(true, 0)
+            val isNetworkAvailable = app.isNetworkAvailable()
+            val preloadJob = loadLastTimetable(type)
 
-                    try {
-                        val timetable = repository.getTimetable(type)
-                        check(timetable.url.isNotBlank()) { "No PDF url link found" }
-                        Log.i(PDF_TAG, "Url: ${timetable.url}")
+            if (isNetworkAvailable) {
+                // Let the user know that we are starting to download a new timetable
+                networkStateFlow.value = NetworkResult.Loading(true, 0)
 
-                        // Show the pre-existing PDF before
-                        preloadJob.join()
+                try {
+                    val timetable = repository.getTimetable(type)
+                    check(timetable.url.isNotBlank()) { "No PDF url link found" }
+                    Log.i(PDF_TAG, "Url: ${timetable.url}")
 
-                        if (force || !repository.doesFileExist(timetable)) {
-                            repository.downloadPdf(timetable)
-                                .flowOn(Dispatchers.IO)
-                                .collect { networkResult ->
-                                    ensureActive()
-                                    networkStateFlow.value = networkResult
-                                }
-                        }
+                    // Show the pre-existing PDF before
+                    preloadJob.join()
 
-                        Log.i(PDF_TAG, "Finished downloading")
-                    } catch (e: Exception) {
-                        networkStateFlow.value =
-                            NetworkResult.Failed(NetworkResult.FailReason.DownloadFailed)
-                        Log.e(PDF_TAG, "Failed to download", e)
+                    if (force || !repository.doesFileExist(timetable)) {
+                        repository.downloadPdf(timetable)
+                            .flowOn(Dispatchers.IO)
+                            .collect { networkResult ->
+                                ensureActive()
+                                networkStateFlow.value = networkResult
+                            }
                     }
-                } else {
-                    preloadJob.join() // Only load the last downloaded one
 
-                    // Let the user know that we can't download a newer timetable
+                    Log.i(PDF_TAG, "Finished downloading")
+                } catch (e: Exception) {
                     networkStateFlow.value =
-                        NetworkResult.Failed(NetworkResult.FailReason.MissingNetworkConnection)
+                        NetworkResult.Failed(NetworkResult.FailReason.DownloadFailed)
+                    Log.e(PDF_TAG, "Failed to download", e)
                 }
+            } else {
+                preloadJob.join() // Only load the last downloaded one
+
+                // Let the user know that we can't download a newer timetable
+                networkStateFlow.value =
+                    NetworkResult.Failed(NetworkResult.FailReason.MissingNetworkConnection)
             }
         }
+    }
 
     private fun subscribeToFirebaseTopics() {
         with(Firebase.messaging) {
@@ -123,9 +127,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             if (BuildConfig.DEBUG)
                 subscribeToTopic(FirebaseConstants.TOPIC_TEST)
-
-            unsubscribeFromTopic(FirebaseConstants.TOPIC_HIGH_SCHOOL)
-            unsubscribeFromTopic(FirebaseConstants.TOPIC_MIDDLE_SCHOOL)
         }
     }
 

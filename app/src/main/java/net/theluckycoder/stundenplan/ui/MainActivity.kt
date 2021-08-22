@@ -1,5 +1,6 @@
 package net.theluckycoder.stundenplan.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.Gravity
 import android.view.Menu
@@ -134,11 +135,13 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_switch_theme -> viewModel.switchTheme(!useDarkTheme)
+            R.id.action_refresh -> viewModel.refresh(force = true)
             else -> return super.onOptionsItemSelected(item)
         }
         return true
     }
 
+    @SuppressLint("ShowToast")
     private fun makeErrorSnackbar(stringRes: Int) =
         Snackbar.make(binding.root, stringRes, Snackbar.LENGTH_LONG)
             .setAnchorView(binding.bottomBar)

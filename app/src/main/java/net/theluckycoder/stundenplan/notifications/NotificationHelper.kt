@@ -55,6 +55,7 @@ object NotificationHelper {
         title: String,
         text: String,
         pendingIntent: PendingIntent,
+        notificationId: Int,
         channelId: String?
     ) {
         val channel = channelId?.takeIf { channelIds.contains(channelId) } ?: CHANNEL_ID_DEFAULT
@@ -71,6 +72,6 @@ object NotificationHelper {
             .build()
 
         NotificationManagerCompat.from(context)
-            .notify(NotificationService.NOTIFICATION_ID, notification)
+            .notify(notificationId, notification)
     }
 }

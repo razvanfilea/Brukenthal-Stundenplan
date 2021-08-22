@@ -2,6 +2,7 @@ package net.theluckycoder.stundenplan.notifications
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -27,6 +28,7 @@ class NotificationService : FirebaseMessagingService() {
         NotificationHelper.createNotificationChannels(this)
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         Log.d(TAG, "New Message Received")
         val data = remoteMessage.data
@@ -44,35 +46,14 @@ class NotificationService : FirebaseMessagingService() {
             else
                 getActivityPendingIntent()
 
-            updateRemoteConfig()
-            cleanCacheDir()
+            GlobalScope.launch(Dispatchers.IO) {
+                updateRemoteConfig()
+                cleanCacheDir(applicationContext)
+            }
 
-            NotificationHelper.postNotification(this, title, body, pendingIntent, channelId)
-        }
-    }
+            val id = if (url != null) NOTIFICATION_WITH_URL_ID else NOTIFICATION_ID
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun updateRemoteConfig() = GlobalScope.launch(Dispatchers.IO) {
-        val remoteConfig = Firebase.remoteConfig
-
-        try {
-            // Fetch the new URLs
-            remoteConfig.fetch(1).await()
-            Log.d(TAG, "Remote Config Fetched")
-
-            remoteConfig.activate().await()
-            Log.d(TAG, "Remote Config Activated")
-        } catch (e: Exception) {
-            Log.e(TAG, "Remote Config Fetch/Activation Failed")
-        }
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun cleanCacheDir() {
-        val appContext = applicationContext
-
-        GlobalScope.launch(Dispatchers.IO) {
-            MainRepository(appContext).clearCache()
+            NotificationHelper.postNotification(this, title, body, pendingIntent, id, channelId)
         }
     }
 
@@ -95,5 +76,26 @@ class NotificationService : FirebaseMessagingService() {
         private const val TAG = "FirebaseNotifications"
 
         const val NOTIFICATION_ID = 1
+        const val NOTIFICATION_WITH_URL_ID = 2
+
+        private suspend fun updateRemoteConfig() {
+            val remoteConfig = Firebase.remoteConfig
+
+            try {
+                // Fetch the new URLs
+                remoteConfig.fetch(1).await()
+                Log.d(TAG, "Remote Config Fetched")
+
+                remoteConfig.activate().await()
+                Log.d(TAG, "Remote Config Activated")
+            } catch (e: Exception) {
+                Log.e(TAG, "Remote Config Fetch/Activation Failed")
+            }
+        }
+
+
+        private fun cleanCacheDir(applicationContext: Context) {
+            MainRepository(applicationContext).clearCache()
+        }
     }
 }

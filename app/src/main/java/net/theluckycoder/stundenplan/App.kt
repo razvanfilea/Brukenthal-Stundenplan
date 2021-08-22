@@ -13,7 +13,7 @@ class App : Application() {
         super.onCreate()
 
         val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = 10 * 60 // 10 minutes
+            minimumFetchIntervalInSeconds = 20 * 60 // 20 minutes
         }
 
         Firebase.remoteConfig.also {

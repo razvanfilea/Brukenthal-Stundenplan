@@ -14,10 +14,12 @@ import com.tonyodev.fetch2.NetworkType
 import com.tonyodev.fetch2.Priority
 import com.tonyodev.fetch2.Request
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.model.Timetable
 import net.theluckycoder.stundenplan.model.TimetableType
@@ -25,6 +27,7 @@ import net.theluckycoder.stundenplan.utils.FirebaseConstants
 import net.theluckycoder.stundenplan.utils.NetworkResult
 import net.theluckycoder.stundenplan.utils.getConfigKey
 import java.io.File
+import java.util.concurrent.Executors
 
 class MainRepository(private val context: Context) {
 
@@ -40,7 +43,7 @@ class MainRepository(private val context: Context) {
     fun doesFileExist(timetable: Timetable): Boolean {
         return File(
             File(context.cacheDir, timetable.type.getConfigKey()),
-            timetable.url.substringAfter('/')
+            timetable.url.substringAfterLast('/')
         ).exists()
     }
 
@@ -113,9 +116,7 @@ class MainRepository(private val context: Context) {
         val dir = File(context.cacheDir, timetableType.getConfigKey())
         dir.mkdirs()
 
-        val files = dir.listFiles()
-        if (files.isNullOrEmpty())
-            return null
+        val files = dir.listFiles() ?: emptyArray()
 
         return files.asSequence()
             .filterNotNull()
