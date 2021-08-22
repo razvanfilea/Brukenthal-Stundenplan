@@ -14,6 +14,6 @@ object Versions {
         const val target = 30
     }
 
-    const val kotlin = "1.5.10"
-    const val kotlinCoroutines = "1.5.0"
+    const val kotlin = "1.5.21"
+    const val kotlinCoroutines = "1.5.1"
 }

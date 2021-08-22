@@ -23,19 +23,18 @@ android {
     }
 
     buildTypes {
-        getByName("debug") {
+        debug {
             extra.set("enableCrashlytics", false)
             extra.set("alwaysUpdateBuildId", false)
         }
         create("staging") {
-            initWith(buildTypes.getByName("debug"))
-            versionNameSuffix("-staging")
+            versionNameSuffix = "-staging"
 
-            debuggable(true)
+            isDebuggable = true
 
             signingConfig = signingConfigs.getByName("debug")
         }
-        getByName("release") {
+        release {
             addManifestPlaceholders(mapOf("firebaseDisabled" to false, "crashlyticsEnabled" to true))
 
             isMinifyEnabled = true
