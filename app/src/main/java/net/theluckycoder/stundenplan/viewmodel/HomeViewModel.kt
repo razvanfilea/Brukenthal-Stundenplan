@@ -72,7 +72,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         width: Int,
         height: Int,
         zoom: Float,
-        xOffset: Int = 0,
+        xOffset: Int = 0, // TODO
         yOffset: Int = 0,
         darkMode: Boolean = false
     ): Bitmap =
