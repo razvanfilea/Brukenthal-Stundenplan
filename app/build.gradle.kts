@@ -55,7 +55,14 @@ android {
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 
-    buildFeatures.viewBinding = true
+    buildFeatures {
+        viewBinding = true
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.0.1"
+    }
 }
 
 dependencies {
@@ -69,6 +76,15 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    // Compose
+    val compose = "1.0.1"
+    implementation("androidx.compose.ui:ui:$compose")
+    implementation("androidx.compose.foundation:foundation:$compose")
+    implementation("androidx.compose.material:material:$compose")
+    implementation("androidx.compose.ui:ui-tooling-preview:$compose")
+    debugImplementation("androidx.compose.ui:ui-tooling:$compose")
+    debugImplementation(kotlin("reflect"))
 
     implementation(platform("com.google.firebase:firebase-bom:28.4.0"))
     implementation("com.google.firebase:firebase-analytics-ktx")
