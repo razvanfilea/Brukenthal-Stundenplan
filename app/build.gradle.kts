@@ -9,6 +9,7 @@ plugins {
 
 android {
     compileSdk = Versions.Sdk.compile
+    buildToolsVersion = "31.0.0"
 
     defaultConfig {
         applicationId = "net.theluckycoder.stundenplan"
