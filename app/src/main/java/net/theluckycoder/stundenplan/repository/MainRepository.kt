@@ -18,6 +18,7 @@ import java.io.File
 class MainRepository(private val context: Context) {
 
     private val retrofit = Retrofit.Builder()
+        .baseUrl("https://brukenthal.ro/")
         .build()
 
     private val downloadApi = retrofit.create<DownloadApi>()
@@ -49,7 +50,7 @@ class MainRepository(private val context: Context) {
         return Timetable(timetableType, pdfUrl)
     }
 
-    suspend fun downloadPdf(timetable: Timetable) = flow<NetworkResult> {
+    suspend fun downloadPdf(timetable: Timetable) = flow {
         val file = getNewFile(timetable)
 
         try {
@@ -58,6 +59,7 @@ class MainRepository(private val context: Context) {
                     input.copyTo(output)
                 }
             }
+            emit(NetworkResult.Success())
         } catch (e: Exception) {
             emit(NetworkResult.Fail(NetworkResult.Fail.Reason.DownloadFailed))
         }

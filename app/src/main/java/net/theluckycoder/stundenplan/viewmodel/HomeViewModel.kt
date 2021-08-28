@@ -62,7 +62,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun refresh() = viewModelScope.launch(Dispatchers.Default) {
-        refreshMutex.withLock("owner?") {
+        refreshMutex.withLock {
             val isNetworkAvailable = app.isNetworkAvailable()
 
             if (isNetworkAvailable) {
@@ -81,6 +81,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     fun switchTimetableType(newTimetableType: TimetableType) {
         timetableStateFlow.value = newTimetableType
+        refresh()
 
         viewModelScope.launch(Dispatchers.Default) {
             // Remove the old pdfRenderer
@@ -97,30 +98,27 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     @Throws(FileNotFoundException::class)
     suspend fun renderPdfAsync(
         width: Int,
-        height: Int,
-        zoom: Float,
+        zoom: Float = 1.0f,
         xOffset: Int = 0, // TODO
         yOffset: Int = 0,
         darkMode: Boolean = false
-    ): Bitmap =
-        withContext(Dispatchers.Default) {
-            val pdfRenderer = pdfRendererMutex.withLock {
-                if (lastPdfRenderer == null) {
-                    val pfd = ParcelFileDescriptor
-                        .open(repository.getLastFile(timetableStateFlow.value), MODE_READ_ONLY)
-                    lastPdfRenderer = PdfRenderer(pfd)
-                }
-
-                lastPdfRenderer!!
+    ): Bitmap = withContext(Dispatchers.Default) {
+        val pdfRenderer = pdfRendererMutex.withLock {
+            if (lastPdfRenderer == null) {
+                val pfd = ParcelFileDescriptor
+                    .open(repository.getLastFile(timetableStateFlow.value), MODE_READ_ONLY)
+                lastPdfRenderer = PdfRenderer(pfd)
             }
 
-            ensureActive()
+            lastPdfRenderer!!
+        }
 
-            val scaledWidth = (width * zoom).roundToInt()
+        ensureActive()
+
+        val scaledWidth = (width * zoom).roundToInt()
 //            val scaledHeight = (height * zoom).roundToInt()
 
-            val page = pdfRenderer.openPage(0)
-
+        pdfRenderer.openPage(0).use { page ->
             val bitmap = Bitmap.createBitmap(
                 scaledWidth, (scaledWidth.toFloat() / page.width * page.height).toInt(),
                 Bitmap.Config.ARGB_8888
@@ -130,6 +128,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
             bitmap
         }
+    }
 
     private suspend fun downloadTimetable() = coroutineScope {
         val type = timetableFlow.value
@@ -150,6 +149,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                         ensureActive()
                         networkStateFlow.value = networkResult
                     }
+            } else {
+                networkStateFlow.value = NetworkResult.Success()
             }
 
             Log.i(PDF_TAG, "Finished downloading")

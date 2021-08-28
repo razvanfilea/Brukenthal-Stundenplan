@@ -33,6 +33,9 @@ android {
             isDebuggable = true
 
             signingConfig = signingConfigs.getByName("debug")
+
+            extra.set("enableCrashlytics", false)
+            extra.set("alwaysUpdateBuildId", false)
         }
         release {
             addManifestPlaceholders(mapOf("firebaseDisabled" to false, "crashlyticsEnabled" to true))
@@ -56,7 +59,6 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
         compose = true
     }
 
