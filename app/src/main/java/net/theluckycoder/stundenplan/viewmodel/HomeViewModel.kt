@@ -2,7 +2,6 @@ package net.theluckycoder.stundenplan.viewmodel
 
 import android.app.Application
 import android.graphics.Bitmap
-import android.graphics.ColorMatrixColorFilter
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import android.os.ParcelFileDescriptor.MODE_READ_ONLY
@@ -25,9 +24,6 @@ import net.theluckycoder.stundenplan.utils.FirebaseConstants
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.roundToInt
-import android.graphics.ColorMatrix
-import android.graphics.Matrix
-
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -109,7 +105,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private companion object {
-        private val invertedColorFilter =
+        /*private val invertedColorFilter =
             ColorMatrix(
                 floatArrayOf(
                     -1f, 0f, 0f, 0f, 255f,
@@ -117,6 +113,6 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                     0f, 0f, -1f, 0f, 255f,
                     0f, 0f, 0f, 1f, 0f
                 )
-            )
+            )*/
     }
 }

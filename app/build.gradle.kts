@@ -61,7 +61,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.0.1"
+        kotlinCompilerExtensionVersion = Versions.compose
     }
 }
 
@@ -78,13 +78,14 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     // Compose
-    val compose = "1.0.1"
-    implementation("androidx.compose.ui:ui:$compose")
-    implementation("androidx.compose.foundation:foundation:$compose")
-    implementation("androidx.compose.material:material:$compose")
-    implementation("androidx.compose.ui:ui-tooling-preview:$compose")
-    debugImplementation("androidx.compose.ui:ui-tooling:$compose")
+    implementation("androidx.compose.ui:ui:${Versions.compose}")
+    implementation("androidx.compose.foundation:foundation:${Versions.compose}")
+    implementation("androidx.compose.material:material:${Versions.compose}")
+    implementation("androidx.compose.ui:ui-tooling-preview:${Versions.compose}")
+    debugImplementation("androidx.compose.ui:ui-tooling:${Versions.compose}")
     debugImplementation(kotlin("reflect"))
+
+    implementation("com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}")
 
     implementation(platform("com.google.firebase:firebase-bom:28.4.0"))
     implementation("com.google.firebase:firebase-analytics-ktx")
