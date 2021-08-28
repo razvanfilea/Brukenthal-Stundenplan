@@ -4,17 +4,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import net.theluckycoder.stundenplan.BuildConfig
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.model.TimetableType
+import net.theluckycoder.stundenplan.utils.Analytics
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
 
 class HomeActivity : ComponentActivity() {
@@ -38,7 +37,18 @@ class HomeActivity : ComponentActivity() {
                 HomeScreen(viewModel = viewModel)
             }
         }
+
         setContentView(view)
+
+        // For Firebase Analytics
+        if (intent.getBooleanExtra(ARG_OPENED_FROM_NOTIFICATION, false))
+            Analytics.openNotificationEvent()
+    }
+
+    companion object {
+        const val ARG_OPENED_FROM_NOTIFICATION = "opened_from_notification"
+        private const val APP_STORE_URL =
+            "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
     }
 }
 
@@ -60,7 +70,7 @@ private fun HomeScreen(
             )
         }
     ) {
-        HomeContent()
+        HomeContent(viewModel)
     }
 }
 
@@ -72,13 +82,17 @@ private fun TopBar() {
             Text(text = stringResource(id = R.string.app_name))
         },
         actions = {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                /*TODO*/
+            }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_switch_theme),
                     contentDescription = null
                 )
             }
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                /*TODO*/
+            }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_refresh),
                     contentDescription = null,
@@ -89,9 +103,10 @@ private fun TopBar() {
     )
 }
 
-@Preview
 @Composable
-private fun HomeContent() {
+private fun HomeContent(
+    viewModel: HomeViewModel
+) {
 
 }
 
@@ -110,7 +125,7 @@ private fun BottomBar(
         )
         BottomNavigationItem(
             selected = timetableType == TimetableType.MIDDLE_SCHOOL,
-            onClick = { onClick(TimetableType.MIDDLE_SCHOOL ) },
+            onClick = { onClick(TimetableType.MIDDLE_SCHOOL) },
             icon = {
                 Text(text = stringResource(id = R.string.middle_school))
             }
@@ -121,9 +136,11 @@ private fun BottomBar(
 @Preview
 @Composable
 fun BottomBarPreview() {
+    var timetableType by remember { mutableStateOf(TimetableType.MIDDLE_SCHOOL) }
+
     AppTheme(isDark = true) {
         BottomBar(timetableType = TimetableType.MIDDLE_SCHOOL) { newTimetableType: TimetableType ->
-
+            timetableType = newTimetableType
         }
     }
 }
