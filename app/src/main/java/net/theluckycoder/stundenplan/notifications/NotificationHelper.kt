@@ -6,10 +6,11 @@ import android.app.PendingIntent
 import android.content.Context
 import android.media.RingtoneManager
 import android.os.Build
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import net.theluckycoder.stundenplan.R
+import net.theluckycoder.stundenplan.ui.AppColors
 
 object NotificationHelper {
 
@@ -65,7 +66,7 @@ object NotificationHelper {
             .setContentTitle(title)
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_notification)
-            .setColor(ContextCompat.getColor(context, R.color.color_primary))
+            .setColor(AppColors.Primary.toArgb())
             .setContentIntent(pendingIntent)
             .setSound(defaultSoundUri)
             .setAutoCancel(true)
