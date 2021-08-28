@@ -5,24 +5,24 @@ import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import android.os.ParcelFileDescriptor.MODE_READ_ONLY
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import net.theluckycoder.stundenplan.BuildConfig
+import net.theluckycoder.stundenplan.extensions.app
+import net.theluckycoder.stundenplan.extensions.isNetworkAvailable
 import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.repository.MainRepository
 import net.theluckycoder.stundenplan.utils.AppPreferences
 import net.theluckycoder.stundenplan.utils.FirebaseConstants
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicReference
+import net.theluckycoder.stundenplan.utils.NetworkResult
+import java.io.FileNotFoundException
 import kotlin.math.roundToInt
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
@@ -30,13 +30,22 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val repository = MainRepository(app)
     private val preferences = AppPreferences(app)
 
-    private val pdfRendererDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
-    private val lastPdfRenderer = AtomicReference<PdfRenderer?>(null)
+    private var lastPdfRenderer: PdfRenderer? = null
 
     private val timetableStateFlow = MutableStateFlow(TimetableType.HIGH_SCHOOL)
     val timetableFlow = timetableStateFlow.asStateFlow()
 
+    private val networkStateFlow = MutableStateFlow<NetworkResult?>(null)
+    val networkFlow = networkStateFlow.asStateFlow()
+
     val darkThemeFlow = preferences.darkThemeFlow
+
+    // region Mutexes
+
+    private val pdfRendererMutex = Mutex()
+    private val refreshMutex = Mutex()
+
+    // endregion Mutexes
 
     init {
         viewModelScope.launch {
@@ -44,7 +53,25 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                 subscribeToFirebaseTopics()
             }
 
-            timetableStateFlow.value = preferences.timetableTypeFlow.first()
+            launch {
+                val lastTimetable = preferences.timetableTypeFlow.first()
+                timetableStateFlow.value = lastTimetable
+                refresh()
+            }
+        }
+    }
+
+    fun refresh() = viewModelScope.launch(Dispatchers.Default) {
+        refreshMutex.withLock("owner?") {
+            val isNetworkAvailable = app.isNetworkAvailable()
+
+            if (isNetworkAvailable) {
+                downloadTimetable()
+            } else {
+                // Let the user know that we can't download a newer timetable
+                networkStateFlow.value =
+                    NetworkResult.Fail(NetworkResult.Fail.Reason.MissingNetworkConnection)
+            }
         }
     }
 
@@ -52,18 +79,22 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         preferences.updateUseDarkTheme(useDarkTheme)
     }
 
-    fun switchTimetableType(newTimetableType: TimetableType) =
-        viewModelScope.launch {
-            // Remove the old pdfRenderer
-            val pdfRenderer = lastPdfRenderer.getAndSet(null)
-            pdfRenderer?.close()
+    fun switchTimetableType(newTimetableType: TimetableType) {
+        timetableStateFlow.value = newTimetableType
 
-            timetableStateFlow.value = newTimetableType
+        viewModelScope.launch(Dispatchers.Default) {
+            // Remove the old pdfRenderer
+            pdfRendererMutex.withLock {
+                lastPdfRenderer?.close()
+                lastPdfRenderer = null
+            }
 
             preferences.updateTimetableType(newTimetableType)
         }
+    }
 
     @Suppress("BlockingMethodInNonBlockingContext")
+    @Throws(FileNotFoundException::class)
     suspend fun renderPdfAsync(
         width: Int,
         height: Int,
@@ -72,13 +103,18 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         yOffset: Int = 0,
         darkMode: Boolean = false
     ): Bitmap =
-        withContext(pdfRendererDispatcher) {
-            val pdfRenderer = lastPdfRenderer.get() ?: let {
-                val pfd = ParcelFileDescriptor
-                    .open(repository.getLastFile(timetableStateFlow.value), MODE_READ_ONLY)
-                PdfRenderer(pfd)
+        withContext(Dispatchers.Default) {
+            val pdfRenderer = pdfRendererMutex.withLock {
+                if (lastPdfRenderer == null) {
+                    val pfd = ParcelFileDescriptor
+                        .open(repository.getLastFile(timetableStateFlow.value), MODE_READ_ONLY)
+                    lastPdfRenderer = PdfRenderer(pfd)
+                }
+
+                lastPdfRenderer!!
             }
-            lastPdfRenderer.set(pdfRenderer)
+
+            ensureActive()
 
             val scaledWidth = (width * zoom).roundToInt()
 //            val scaledHeight = (height * zoom).roundToInt()
@@ -95,6 +131,36 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             bitmap
         }
 
+    private suspend fun downloadTimetable() = coroutineScope {
+        val type = timetableFlow.value
+
+        // Let the user know that we are starting the download
+        networkStateFlow.value = NetworkResult.Loading()
+
+        try {
+            val timetable = repository.getTimetable(type)
+            check(timetable.url.isNotBlank()) { "No PDF url link found" }
+
+            Log.i(PDF_TAG, "Url: ${timetable.url}")
+
+            if (!repository.doesFileExist(timetable)) {
+                repository.downloadPdf(timetable)
+                    .flowOn(Dispatchers.IO)
+                    .collect { networkResult ->
+                        ensureActive()
+                        networkStateFlow.value = networkResult
+                    }
+            }
+
+            Log.i(PDF_TAG, "Finished downloading")
+        } catch (e: Exception) {
+            Log.e(PDF_TAG, "Failed to download for $type", e)
+
+            networkStateFlow.value =
+                NetworkResult.Fail(NetworkResult.Fail.Reason.DownloadFailed)
+        }
+    }
+
     private fun subscribeToFirebaseTopics() {
         with(Firebase.messaging) {
             subscribeToTopic(FirebaseConstants.TOPIC_ALL)
@@ -105,6 +171,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private companion object {
+        private const val PDF_TAG = "PDF Load"
+
         /*private val invertedColorFilter =
             ColorMatrix(
                 floatArrayOf(

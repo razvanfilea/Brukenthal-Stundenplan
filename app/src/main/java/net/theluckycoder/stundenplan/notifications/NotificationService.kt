@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -17,7 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.repository.MainRepository
-import net.theluckycoder.stundenplan.ui.MainActivity
+import net.theluckycoder.stundenplan.ui.HomeActivity
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 class NotificationService : FirebaseMessagingService() {
@@ -58,22 +59,29 @@ class NotificationService : FirebaseMessagingService() {
     }
 
     private fun getActivityPendingIntent(): PendingIntent {
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, HomeActivity::class.java)
 
-        intent.putExtra(MainActivity.ARG_OPENED_FROM_NOTIFICATION, true)
+        intent.putExtra(HomeActivity.ARG_OPENED_FROM_NOTIFICATION, true)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
-        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        return PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or IMMUTABLE_INTENT_FLAG
+        )
     }
 
     private fun getUrlPendingIntent(url: String): PendingIntent {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
 
-        return PendingIntent.getActivity(this, 0, intent, 0)
+        return PendingIntent.getActivity(this, 0, intent, IMMUTABLE_INTENT_FLAG)
     }
 
     companion object {
         private const val TAG = "FirebaseNotifications"
+        private val IMMUTABLE_INTENT_FLAG =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
 
         const val NOTIFICATION_ID = 1
         const val NOTIFICATION_WITH_URL_ID = 2

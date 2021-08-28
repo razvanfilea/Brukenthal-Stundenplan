@@ -66,14 +66,13 @@ android {
 }
 
 dependencies {
+    // Kotlin
     kotlin("stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.kotlinCoroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:${Versions.kotlinCoroutines}")
 
-    implementation("androidx.appcompat:appcompat:1.3.1")
-    implementation("com.google.android.material:material:1.4.0")
+    // AndroidX
     implementation("androidx.activity:activity-ktx:1.3.1")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
@@ -85,14 +84,17 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:${Versions.compose}")
     debugImplementation(kotlin("reflect"))
 
+    // Compose Accompanist
     implementation("com.google.accompanist:accompanist-swiperefresh:${Versions.accompanist}")
     implementation("com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}")
 
+    // Firefox
     implementation(platform("com.google.firebase:firebase-bom:28.4.0"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-config-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")
 
-    implementation("androidx.tonyodev.fetch2:xfetch2:3.1.6")
+    // Other
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
 }

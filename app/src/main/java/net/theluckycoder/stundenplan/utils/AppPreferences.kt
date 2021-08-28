@@ -39,7 +39,7 @@ class AppPreferences(private val context: Application) {
         }
 
     companion object {
-        const val DATA_STORE_NAME = "user_prefs"
+        private const val DATA_STORE_NAME = "user_prefs"
 
         private val DARK_THEME = booleanPreferencesKey("dark_theme")
         private val TIMETABLE_TYPE = booleanPreferencesKey("timetable_type")
