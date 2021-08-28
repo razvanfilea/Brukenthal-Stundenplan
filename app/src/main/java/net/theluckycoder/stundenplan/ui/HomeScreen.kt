@@ -5,12 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
@@ -26,6 +28,13 @@ class HomeActivity : ComponentActivity() {
         view.setContent {
             val isDark by viewModel.darkThemeFlow.collectAsState(initial = true)
             AppTheme(isDark = isDark) {
+                val systemUiController = rememberSystemUiController()
+
+                val primaryVariantColor = MaterialTheme.colors.primaryVariant
+                SideEffect {
+                    systemUiController.setSystemBarsColor(primaryVariantColor, darkIcons = true)
+                }
+
                 HomeScreen(viewModel = viewModel)
             }
         }
