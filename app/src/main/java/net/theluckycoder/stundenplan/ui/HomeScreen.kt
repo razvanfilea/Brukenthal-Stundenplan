@@ -1,11 +1,23 @@
 package net.theluckycoder.stundenplan.ui
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,7 +71,7 @@ private fun HomeScreen(
     val timetableType = viewModel.timetableFlow.collectAsState()
     Scaffold(
         topBar = {
-            TopBar()
+            TopBar(viewModel)
         },
         bottomBar = {
             BottomBar(
@@ -74,16 +86,19 @@ private fun HomeScreen(
     }
 }
 
-@Preview
 @Composable
-private fun TopBar() {
+private fun TopBar(
+    viewModel: HomeViewModel
+) {
     TopAppBar(
+        backgroundColor = MaterialTheme.colors.primary,
         title = {
             Text(text = stringResource(id = R.string.activity_title))
         },
         actions = {
+            val darkThemeFlow = viewModel.darkThemeFlow.collectAsState(initial = true)
             IconButton(onClick = {
-                /*TODO*/
+                viewModel.switchTheme(!darkThemeFlow.value)
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_switch_theme),
@@ -91,7 +106,7 @@ private fun TopBar() {
                 )
             }
             IconButton(onClick = {
-                /*TODO*/
+                viewModel.refresh()
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_refresh),
@@ -107,7 +122,49 @@ private fun TopBar() {
 private fun HomeContent(
     viewModel: HomeViewModel
 ) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val width = with(LocalDensity.current) { maxWidth.toPx() }
 
+        val networkFlow by viewModel.networkFlow.collectAsState()
+
+        var scale by remember { mutableStateOf(1f) }
+        var offset by remember { mutableStateOf(Offset.Zero) }
+        var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+        LaunchedEffect(width, networkFlow, scale) {
+            try {
+                bitmap = viewModel.renderPdf(width.toInt(), zoom = scale)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        if (bitmap != null) {
+            Image(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer(
+                        scaleX = scale,
+                        scaleY = scale,
+                        translationX = offset.x,
+                        translationY = offset.y,
+                    )
+                    .pointerInput(Unit) {
+                        detectTransformGestures { _, pan, zoom, _ ->
+                            offset += pan
+                            scale *= zoom
+                        }
+                    }
+                    .pointerInput(Unit) {
+                        detectTapGestures {
+
+                        }
+                    },
+                bitmap = bitmap!!.asImageBitmap(),
+                contentDescription = null
+            )
+        }
+    }
 }
 
 @Composable

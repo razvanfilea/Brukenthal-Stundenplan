@@ -96,7 +96,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     @Suppress("BlockingMethodInNonBlockingContext")
     @Throws(FileNotFoundException::class)
-    suspend fun renderPdfAsync(
+    suspend fun renderPdf(
         width: Int,
         zoom: Float = 1.0f,
         xOffset: Int = 0, // TODO
