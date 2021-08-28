@@ -85,6 +85,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:${Versions.compose}")
     debugImplementation(kotlin("reflect"))
 
+    implementation("com.google.accompanist:accompanist-swiperefresh:${Versions.accompanist}")
     implementation("com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}")
 
     implementation(platform("com.google.firebase:firebase-bom:28.4.0"))
@@ -93,6 +94,5 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")
 
-    implementation("com.github.barteksc:android-pdf-viewer:3.2.0-beta.1")
     implementation("androidx.tonyodev.fetch2:xfetch2:3.1.6")
 }
