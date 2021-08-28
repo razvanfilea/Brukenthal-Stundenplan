@@ -1,16 +1,22 @@
 package net.theluckycoder.stundenplan.utils
 
-import android.net.Uri
-
 sealed class NetworkResult {
-    class Success(val fileUri: Uri) : NetworkResult()
+    class Success : NetworkResult() {
+        override fun equals(other: Any?): Boolean = this === other
 
-    class Loading(val indeterminate: Boolean, val progress: Int) : NetworkResult()
+        override fun hashCode(): Int = System.identityHashCode(this)
+    }
 
-    class Failed(val reason: FailReason) : NetworkResult()
+    class Loading : NetworkResult() {
+        override fun equals(other: Any?): Boolean = this === other
 
-    enum class FailReason {
-        MissingNetworkConnection,
-        DownloadFailed,
+        override fun hashCode(): Int = System.identityHashCode(this)
+    }
+
+    class Fail(val reason: Reason) : NetworkResult() {
+        enum class Reason {
+            MissingNetworkConnection,
+            DownloadFailed,
+        }
     }
 }

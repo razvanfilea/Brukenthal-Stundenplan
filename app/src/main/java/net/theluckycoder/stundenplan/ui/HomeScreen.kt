@@ -79,7 +79,7 @@ private fun HomeScreen(
 private fun TopBar() {
     TopAppBar(
         title = {
-            Text(text = stringResource(id = R.string.app_name))
+            Text(text = stringResource(id = R.string.activity_title))
         },
         actions = {
             IconButton(onClick = {
@@ -139,7 +139,7 @@ fun BottomBarPreview() {
     var timetableType by remember { mutableStateOf(TimetableType.MIDDLE_SCHOOL) }
 
     AppTheme(isDark = true) {
-        BottomBar(timetableType = TimetableType.MIDDLE_SCHOOL) { newTimetableType: TimetableType ->
+        BottomBar(timetableType = timetableType) { newTimetableType: TimetableType ->
             timetableType = newTimetableType
         }
     }
