@@ -2,6 +2,7 @@ package net.theluckycoder.stundenplan.viewmodel
 
 import android.app.Application
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import android.os.ParcelFileDescriptor.MODE_READ_ONLY
@@ -99,8 +100,6 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     suspend fun renderPdf(
         width: Int,
         zoom: Float = 1.0f,
-        xOffset: Int = 0, // TODO
-        yOffset: Int = 0,
         darkMode: Boolean = false
     ): Bitmap = withContext(Dispatchers.Default) {
         val pdfRenderer = pdfRendererMutex.withLock {
@@ -125,6 +124,21 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             )
 
             page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+            
+            if (darkMode) {
+              val length = bitmap.width * bitmap.height
+              val pixels = IntArray(length)
+              bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+              
+              for (i in 0 until length) {
+                val c = pixels[i]
+                if (c.alpha() != 0) {
+                  pixels[i] = Color.argb(Color.alpha(c), 255 - Color.red(c), 255 - Color.green(c), 255 - Color.blue(c))
+                }
+              }
+              
+              bitmap.setPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+            }
 
             bitmap
         }
@@ -173,15 +187,5 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     private companion object {
         private const val PDF_TAG = "PDF Load"
-
-        /*private val invertedColorFilter =
-            ColorMatrix(
-                floatArrayOf(
-                    -1f, 0f, 0f, 0f, 255f,
-                    0f, -1f, 0f, 0f, 255f,
-                    0f, 0f, -1f, 0f, 255f,
-                    0f, 0f, 0f, 1f, 0f
-                )
-            )*/
     }
 }
