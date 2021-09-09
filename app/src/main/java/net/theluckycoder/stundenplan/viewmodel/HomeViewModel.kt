@@ -117,31 +117,33 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         val scaledWidth = (width * zoom).roundToInt()
 //            val scaledHeight = (height * zoom).roundToInt()
 
-        pdfRenderer.openPage(0).use { page ->
+        val bitmap = pdfRenderer.openPage(0).use { page ->
             val bitmap = Bitmap.createBitmap(
                 scaledWidth, (scaledWidth.toFloat() / page.width * page.height).toInt(),
                 Bitmap.Config.ARGB_8888
             )
 
             page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-            
-            if (darkMode) {
-              val length = bitmap.width * bitmap.height
-              val pixels = IntArray(length)
-              bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-              
-              for (i in 0 until length) {
-                val c = pixels[i]
-                if (c.alpha() != 0) {
-                  pixels[i] = Color.argb(Color.alpha(c), 255 - Color.red(c), 255 - Color.green(c), 255 - Color.blue(c))
-                }
-              }
-              
-              bitmap.setPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-            }
 
             bitmap
         }
+        
+        if (darkMode) {
+          val length = bitmap.width * bitmap.height
+          val pixels = IntArray(length)
+          bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+
+          for (i in 0 until length) {
+            val c = pixels[i]
+            if (Color.alpha(c) != 0) {
+              pixels[i] = Color.argb(Color.alpha(c), 255 - Color.red(c), 255 - Color.green(c), 255 - Color.blue(c))
+            }
+          }
+                      
+          bitmap.setPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+        }
+        
+        bitmap
     }
 
     private suspend fun downloadTimetable() = coroutineScope {
