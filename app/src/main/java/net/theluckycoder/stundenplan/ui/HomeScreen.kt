@@ -5,14 +5,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -27,6 +28,7 @@ import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.utils.Analytics
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
+import kotlin.math.roundToInt
 
 class HomeActivity : ComponentActivity() {
 
@@ -76,7 +78,7 @@ private fun HomeScreen(
         bottomBar = {
             BottomBar(
                 timetableType = timetableType.value,
-                onClick = { newTimetableType ->
+                onTimetableChange = { newTimetableType ->
                     viewModel.switchTimetableType(newTimetableType)
                 }
             )
@@ -125,16 +127,19 @@ private fun HomeContent(
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val width = with(LocalDensity.current) { maxWidth.toPx() }
 
+        val timetableFlow by viewModel.timetableFlow.collectAsState()
         val networkFlow by viewModel.networkFlow.collectAsState()
 
         var scale by remember { mutableStateOf(1f) }
         var offset by remember { mutableStateOf(Offset.Zero) }
         var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-        LaunchedEffect(width, networkFlow, scale) {
+        val roundedScale = scale.roundToInt()
+        LaunchedEffect(width, timetableFlow, networkFlow, roundedScale) {
             try {
-                bitmap = viewModel.renderPdf(width.toInt(), zoom = scale)
+                bitmap = viewModel.renderPdf(width.toInt(), zoom = roundedScale.toFloat())
             } catch (e: Exception) {
+                // Many things can go wrong, but oh well, we'll just do nothing
                 e.printStackTrace()
             }
         }
@@ -154,11 +159,6 @@ private fun HomeContent(
                             offset += pan
                             scale *= zoom
                         }
-                    }
-                    .pointerInput(Unit) {
-                        detectTapGestures {
-
-                        }
                     },
                 bitmap = bitmap!!.asImageBitmap(),
                 contentDescription = null
@@ -170,21 +170,32 @@ private fun HomeContent(
 @Composable
 private fun BottomBar(
     timetableType: TimetableType,
-    onClick: (TimetableType) -> Unit
+    onTimetableChange: (newTimetable: TimetableType) -> Unit
 ) {
-    BottomAppBar {
+    BottomAppBar(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        val highSchoolSelected = timetableType == TimetableType.HIGH_SCHOOL
+        val middleSchoolSelected = highSchoolSelected.not()
+
         BottomNavigationItem(
-            selected = timetableType == TimetableType.HIGH_SCHOOL,
-            onClick = { onClick(TimetableType.HIGH_SCHOOL) },
+            selected = highSchoolSelected,
+            onClick = { onTimetableChange(TimetableType.HIGH_SCHOOL) },
             icon = {
-                Text(text = stringResource(id = R.string.high_school))
+                Text(
+                    text = stringResource(id = R.string.high_school),
+                    color = if (highSchoolSelected) MaterialTheme.colors.secondaryVariant else Color.Unspecified,
+                )
             }
         )
         BottomNavigationItem(
-            selected = timetableType == TimetableType.MIDDLE_SCHOOL,
-            onClick = { onClick(TimetableType.MIDDLE_SCHOOL) },
+            selected = middleSchoolSelected,
+            onClick = { onTimetableChange(TimetableType.MIDDLE_SCHOOL) },
             icon = {
-                Text(text = stringResource(id = R.string.middle_school))
+                Text(
+                    text = stringResource(id = R.string.middle_school),
+                    color = if (middleSchoolSelected) MaterialTheme.colors.secondaryVariant else Color.Unspecified,
+                )
             }
         )
     }

@@ -91,7 +91,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-swiperefresh:${Versions.accompanist}")
     implementation("com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}")
 
-    // Firefox
+    // Firebase
     implementation(platform("com.google.firebase:firebase-bom:28.4.0"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-config-ktx")

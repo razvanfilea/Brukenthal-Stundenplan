@@ -23,7 +23,6 @@ import net.theluckycoder.stundenplan.repository.MainRepository
 import net.theluckycoder.stundenplan.utils.AppPreferences
 import net.theluckycoder.stundenplan.utils.FirebaseConstants
 import net.theluckycoder.stundenplan.utils.NetworkResult
-import java.io.FileNotFoundException
 import kotlin.math.roundToInt
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
@@ -95,8 +94,6 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext")
-    @Throws(FileNotFoundException::class)
     suspend fun renderPdf(
         width: Int,
         zoom: Float = 1.0f,
@@ -104,9 +101,9 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     ): Bitmap = withContext(Dispatchers.Default) {
         val pdfRenderer = pdfRendererMutex.withLock {
             if (lastPdfRenderer == null) {
-                val pfd = ParcelFileDescriptor
-                    .open(repository.getLastFile(timetableStateFlow.value), MODE_READ_ONLY)
-                lastPdfRenderer = PdfRenderer(pfd)
+                lastPdfRenderer = withContext(Dispatchers.IO) {
+                    getNewPdfRenderer(timetableStateFlow.value)
+                }
             }
 
             lastPdfRenderer!!
@@ -127,23 +124,34 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
             bitmap
         }
-        
-        if (darkMode) {
-          val length = bitmap.width * bitmap.height
-          val pixels = IntArray(length)
-          bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
 
-          for (i in 0 until length) {
-            val c = pixels[i]
-            if (Color.alpha(c) != 0) {
-              pixels[i] = Color.argb(Color.alpha(c), 255 - Color.red(c), 255 - Color.green(c), 255 - Color.blue(c))
+        if (darkMode) {
+            val length = bitmap.width * bitmap.height
+            val pixels = IntArray(length)
+            bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+
+            for (i in 0 until length) {
+                val c = pixels[i]
+                if (Color.alpha(c) != 0) {
+                    pixels[i] = Color.argb(
+                        Color.alpha(c),
+                        255 - Color.red(c),
+                        255 - Color.green(c),
+                        255 - Color.blue(c)
+                    )
+                }
             }
-          }
-                      
-          bitmap.setPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+
+            bitmap.setPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
         }
-        
+
         bitmap
+    }
+
+    private fun getNewPdfRenderer(type: TimetableType): PdfRenderer {
+        val file = repository.getLastFile(type)
+        val pfd = ParcelFileDescriptor.open(file, MODE_READ_ONLY)
+        return PdfRenderer(pfd)
     }
 
     private suspend fun downloadTimetable() = coroutineScope {

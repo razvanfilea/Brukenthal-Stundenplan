@@ -18,7 +18,8 @@ object NotificationHelper {
     private const val CHANNEL_ID_HIGH_SCHOOL = "high_school"
     private const val CHANNEL_ID_MIDDLE_SCHOOL = "middle_school"
 
-    private val channelIds = listOf(CHANNEL_ID_DEFAULT, CHANNEL_ID_HIGH_SCHOOL, CHANNEL_ID_MIDDLE_SCHOOL)
+    private val channelIds =
+        listOf(CHANNEL_ID_DEFAULT, CHANNEL_ID_HIGH_SCHOOL, CHANNEL_ID_MIDDLE_SCHOOL)
 
     fun createNotificationChannels(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)

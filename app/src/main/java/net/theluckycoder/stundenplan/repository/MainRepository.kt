@@ -45,7 +45,10 @@ class MainRepository(private val context: Context) {
         val remoteConfig = Firebase.remoteConfig
 
         remoteConfig.fetchAndActivate().await()
-        val pdfUrl = remoteConfig[timetableType.getConfigKey()].asString()
+        var pdfUrl = remoteConfig[timetableType.getConfigKey()].asString().lowercase()
+
+        if (!pdfUrl.startsWith("https://brukenthal.ro"))
+            pdfUrl = "https://brukenthal.ro/$pdfUrl"
 
         return Timetable(timetableType, pdfUrl)
     }
@@ -61,6 +64,7 @@ class MainRepository(private val context: Context) {
             }
             emit(NetworkResult.Success())
         } catch (e: Exception) {
+            e.printStackTrace()
             emit(NetworkResult.Fail(NetworkResult.Fail.Reason.DownloadFailed))
         }
     }
