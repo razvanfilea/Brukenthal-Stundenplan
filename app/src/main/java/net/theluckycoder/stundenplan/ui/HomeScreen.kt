@@ -28,6 +28,7 @@ import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.utils.Analytics
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
+import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 class HomeActivity : ComponentActivity() {
@@ -129,16 +130,18 @@ private fun HomeContent(
 
         val timetableFlow by viewModel.timetableFlow.collectAsState()
         val networkFlow by viewModel.networkFlow.collectAsState()
+        val darkMode by viewModel.darkThemeFlow.collectAsState(true)
 
         var scale by remember { mutableStateOf(1f) }
         var offset by remember { mutableStateOf(Offset.Zero) }
         var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-        val roundedScale = scale.roundToInt()
-        LaunchedEffect(width, timetableFlow, networkFlow, roundedScale) {
+//        val roundedScale =  // we round the number
+        LaunchedEffect(width, timetableFlow, networkFlow, ceil(scale).toInt(), darkMode) {
             try {
-                bitmap = viewModel.renderPdf(width.toInt(), zoom = roundedScale.toFloat())
+                bitmap = viewModel.renderPdf(width.toInt(), ceil(scale), darkMode)
             } catch (e: Exception) {
+                // TODO
                 // Many things can go wrong, but oh well, we'll just do nothing
                 e.printStackTrace()
             }
@@ -157,7 +160,7 @@ private fun HomeContent(
                     .pointerInput(Unit) {
                         detectTransformGestures { _, pan, zoom, _ ->
                             offset += pan
-                            scale *= zoom
+                            scale = (scale * zoom).coerceIn(1f, 4.5f)
                         }
                     },
                 bitmap = bitmap!!.asImageBitmap(),
@@ -173,7 +176,8 @@ private fun BottomBar(
     onTimetableChange: (newTimetable: TimetableType) -> Unit
 ) {
     BottomAppBar(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        backgroundColor = MaterialTheme.colors.surface,
     ) {
         val highSchoolSelected = timetableType == TimetableType.HIGH_SCHOOL
         val middleSchoolSelected = highSchoolSelected.not()

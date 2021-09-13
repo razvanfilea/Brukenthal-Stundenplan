@@ -45,10 +45,11 @@ class MainRepository(private val context: Context) {
         val remoteConfig = Firebase.remoteConfig
 
         remoteConfig.fetchAndActivate().await()
-        var pdfUrl = remoteConfig[timetableType.getConfigKey()].asString().lowercase()
+        var pdfUrl = remoteConfig[timetableType.getConfigKey()].asString()
+            .removePrefix(SITE_URL)
 
         if (!pdfUrl.startsWith("https://brukenthal.ro"))
-            pdfUrl = "https://brukenthal.ro/$pdfUrl"
+            pdfUrl = "$SITE_URL/$pdfUrl"
 
         return Timetable(timetableType, pdfUrl)
     }
@@ -84,5 +85,9 @@ class MainRepository(private val context: Context) {
     fun clearCache() {
         File(context.cacheDir, FirebaseConstants.KEY_HIGH_SCHOOL).deleteRecursively()
         File(context.cacheDir, FirebaseConstants.KEY_MIDDLE_SCHOOL).deleteRecursively()
+    }
+
+    private companion object {
+        const val SITE_URL = "https://brukenthal.ro"
     }
 }
