@@ -99,30 +99,29 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         zoom: Float = 1.0f,
         darkMode: Boolean = false
     ): Bitmap = withContext(Dispatchers.Default) {
-        val pdfRenderer = pdfRendererMutex.withLock {
-            if (lastPdfRenderer == null) {
-                lastPdfRenderer = withContext(Dispatchers.IO) {
-                    getNewPdfRenderer(timetableStateFlow.value)
-                }
-            }
-
-            lastPdfRenderer!!
-        }
-
-        ensureActive()
 
         val scaledWidth = (width * zoom).roundToInt()
 //            val scaledHeight = (height * zoom).roundToInt()
 
-        val bitmap = pdfRenderer.openPage(0).use { page ->
-            val bitmap = Bitmap.createBitmap(
-                scaledWidth, (scaledWidth.toFloat() / page.width * page.height).toInt(),
-                Bitmap.Config.ARGB_8888
-            )
+        val bitmap = pdfRendererMutex.withLock {
+            val pdfRenderer = lastPdfRenderer ?: withContext(Dispatchers.IO) {
+                getNewPdfRenderer(timetableStateFlow.value)
+            }
 
-            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+            lastPdfRenderer = pdfRenderer
 
-            bitmap
+            ensureActive()
+
+            pdfRenderer.openPage(0).use { page ->
+                val bitmap = Bitmap.createBitmap(
+                    scaledWidth, (scaledWidth.toFloat() / page.width * page.height).toInt(),
+                    Bitmap.Config.ARGB_8888
+                )
+
+                page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+
+                bitmap
+            }
         }
 
         if (darkMode) {
