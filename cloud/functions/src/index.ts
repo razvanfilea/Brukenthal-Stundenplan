@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import fetch from 'node-fetch';
+const fetch = require('node-fetch');
+// import {fetch} from 'node-fetch';
 import {JSDOM} from 'jsdom';
 
 admin.initializeApp();
@@ -35,15 +36,10 @@ const TITLES = [
     "Neue Veränderungen im Stundenplan!"
 ];
 const MESSAGES = [
-    "Diamond Hands!💎👐🚀🚀🚀",
-    "doot doot",
     "Aww man!",
-    "Haideți copii înapoi la ora, nu mai chiuliți!",
+    "Some people call this junk. Me? I call it treasure",
     "Geschwindigkeit und Prezision!",
     "I used to be an adventurer like you, then I took an arrow to the knee.",
-    "It is...   ...acceptable",
-    "He turned himself into a pickle, funniest thing I've ever seen",
-    "Bate bacu' in geam... nu-l aud ca am termopan"
 ];
 
 /// Structures
@@ -132,7 +128,7 @@ async function updateRemoteConfig(newConfigValues: ConfigValues): Promise<void> 
 exports.checkForNewTimetable = functions
     .region('europe-west1')
     .pubsub
-    .schedule('every 40 minutes')
+    .schedule('every 50 minutes')
     .onRun(async () => {
         // Fetch and store the site as HTML
         const html = await fetch(SITE_URL).then(data => data.text())
