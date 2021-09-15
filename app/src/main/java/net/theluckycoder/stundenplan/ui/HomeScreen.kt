@@ -2,9 +2,11 @@ package net.theluckycoder.stundenplan.ui
 
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.view.GestureDetector
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,14 +24,16 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import net.theluckycoder.stundenplan.BuildConfig
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.utils.Analytics
+import net.theluckycoder.stundenplan.utils.NetworkResult
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
 import kotlin.math.ceil
-import kotlin.math.roundToInt
 
 class HomeActivity : ComponentActivity() {
 
@@ -72,7 +76,10 @@ private fun HomeScreen(
     viewModel: HomeViewModel,
 ) {
     val timetableType = viewModel.timetableFlow.collectAsState()
+    val scaffoldState = rememberScaffoldState()
+
     Scaffold(
+        scaffoldState = scaffoldState,
         topBar = {
             TopBar(viewModel)
         },
@@ -85,7 +92,7 @@ private fun HomeScreen(
             )
         }
     ) {
-        HomeContent(viewModel)
+        HomeContent(viewModel, scaffoldState.snackbarHostState)
     }
 }
 
@@ -123,28 +130,58 @@ private fun TopBar(
 
 @Composable
 private fun HomeContent(
-    viewModel: HomeViewModel
-) {
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        val width = with(LocalDensity.current) { maxWidth.toPx() }
+    viewModel: HomeViewModel,
+    snackbarHostState: SnackbarHostState
+) = BoxWithConstraints(Modifier.fillMaxSize()) {
+    val width = with(LocalDensity.current) { maxWidth.toPx() }
+    val networkResult by viewModel.networkFlow.collectAsState()
+    val swipeState = rememberSwipeRefreshState(isRefreshing = networkResult is NetworkResult.Loading)
 
-        val timetableFlow by viewModel.timetableFlow.collectAsState()
-        val networkFlow by viewModel.networkFlow.collectAsState()
+    val missingNetworkError = stringResource(id = R.string.error_network_connection)
+    val downloadFailed = stringResource(id = R.string.error_download_failed)
+
+    LaunchedEffect(networkResult) {
+        @Suppress("UnnecessaryVariable") val result = networkResult
+        if (result is NetworkResult.Fail){
+            val message =  when(result.reason){
+                NetworkResult.Fail.Reason.MissingNetworkConnection -> missingNetworkError
+                NetworkResult.Fail.Reason.DownloadFailed -> downloadFailed
+            }
+
+            snackbarHostState.showSnackbar(message)
+        }
+    }
+
+    SwipeRefresh(
+        state = swipeState,
+        onRefresh = { },
+        swipeEnabled = false,
+    ) {
+
+        val timetableType by viewModel.timetableFlow.collectAsState()
         val darkMode by viewModel.darkThemeFlow.collectAsState(true)
 
         var scale by remember { mutableStateOf(1f) }
         var offset by remember { mutableStateOf(Offset.Zero) }
         var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
+
+
 //        val roundedScale =  // we round the number
-        LaunchedEffect(width, timetableFlow, networkFlow, ceil(scale).toInt(), darkMode) {
+        LaunchedEffect(width, timetableType, networkResult, ceil(scale).toInt(), darkMode) {
             try {
                 bitmap = viewModel.renderPdf(width.toInt(), ceil(scale), darkMode)
+            } catch (_: OutOfMemoryError) {
             } catch (e: Exception) {
                 // TODO
                 // Many things can go wrong, but oh well, we'll just do nothing
                 e.printStackTrace()
             }
+        }
+
+        LaunchedEffect(timetableType) {
+            scale = 1f
+            offset = Offset.Zero
         }
 
         if (bitmap != null) {
@@ -158,10 +195,27 @@ private fun HomeContent(
                         translationY = offset.y,
                     )
                     .pointerInput(Unit) {
-                        detectTransformGestures { _, pan, zoom, _ ->
-                            offset += pan
+                        detectTransformGestures { centroid, pan, zoom, _ ->
                             scale = (scale * zoom).coerceIn(1f, 4.5f)
+                            offset += (pan * scale)
                         }
+                    }
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onLongPress = {
+                                scale
+                            }
+                        )
+                    }
+                    .pointerInput(Unit){
+                        detectTapGestures(
+                            onDoubleTap = {
+                                if(scale>1)
+                                    scale = 1f
+                                else
+                                    scale = 2.5f
+                            }
+                        )
                     },
                 bitmap = bitmap!!.asImageBitmap(),
                 contentDescription = null
@@ -169,7 +223,6 @@ private fun HomeContent(
         }
     }
 }
-
 @Composable
 private fun BottomBar(
     timetableType: TimetableType,

@@ -131,6 +131,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
             for (i in 0 until length) {
                 val c = pixels[i]
+                // Invert all the colors that aren't transparent
                 if (Color.alpha(c) != 0) {
                     pixels[i] = Color.argb(
                         Color.alpha(c),
