@@ -7,6 +7,7 @@ import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import android.os.ParcelFileDescriptor.MODE_READ_ONLY
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.ktx.Firebase
@@ -22,7 +23,7 @@ import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.repository.MainRepository
 import net.theluckycoder.stundenplan.utils.AppPreferences
 import net.theluckycoder.stundenplan.utils.FirebaseConstants
-import net.theluckycoder.stundenplan.utils.NetworkResult
+import net.theluckycoder.stundenplan.notifications.NetworkResult
 import kotlin.math.roundToInt
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
@@ -39,6 +40,9 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     val networkFlow = networkStateFlow.asStateFlow()
 
     val darkThemeFlow = preferences.darkThemeFlow
+
+    val hasSeenUpdateDialog = mutableStateOf(false)
+    val showAppBar = mutableStateOf(true)
 
     // region Mutexes
 
@@ -101,7 +105,6 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     ): Bitmap = withContext(Dispatchers.Default) {
 
         val scaledWidth = (width * zoom).roundToInt()
-//            val scaledHeight = (height * zoom).roundToInt()
 
         val bitmap = pdfRendererMutex.withLock {
             val pdfRenderer = lastPdfRenderer ?: withContext(Dispatchers.IO) {
@@ -123,6 +126,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                 bitmap
             }
         }
+
+        Log.d("Pdf Render", "Rendered Bitmap (${bitmap.width}, ${bitmap.height}); Zoom ${zoom.roundToInt()}; DarkMode $darkMode")
 
         if (darkMode) {
             val length = bitmap.width * bitmap.height

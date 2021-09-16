@@ -5,19 +5,19 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import net.theluckycoder.stundenplan.BuildConfig
 
-class UpdateChecker(onUpdateNeeded: () -> Unit) {
+object UpdateChecker {
 
-    init {
+    fun isUpdateNeeded(): Boolean {
         val remoteConfig = Firebase.remoteConfig
         val latestVersion = remoteConfig.getLong(KEY_CURRENT_VERSION).toInt()
 
-        if (latestVersion > BuildConfig.VERSION_CODE) {
+        val result = latestVersion > BuildConfig.VERSION_CODE
+        if (result) {
             Log.v(UpdateChecker::class.java.name, "New Update available: $latestVersion")
-            onUpdateNeeded()
         }
+
+        return result
     }
 
-    companion object {
-        const val KEY_CURRENT_VERSION = "latest_version"
-    }
+    const val KEY_CURRENT_VERSION = "latest_version"
 }

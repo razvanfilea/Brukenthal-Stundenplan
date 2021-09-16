@@ -2,17 +2,19 @@ package net.theluckycoder.stundenplan.ui
 
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.view.GestureDetector
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -20,18 +22,23 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import net.theluckycoder.stundenplan.BuildConfig
 import net.theluckycoder.stundenplan.R
+import net.theluckycoder.stundenplan.extensions.browseUrl
 import net.theluckycoder.stundenplan.model.TimetableType
+import net.theluckycoder.stundenplan.notifications.NetworkResult
 import net.theluckycoder.stundenplan.utils.Analytics
-import net.theluckycoder.stundenplan.utils.NetworkResult
+import net.theluckycoder.stundenplan.utils.UpdateChecker
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
 import kotlin.math.ceil
 
@@ -45,6 +52,7 @@ class HomeActivity : ComponentActivity() {
         val view = ComposeView(this)
         view.setContent {
             val isDark by viewModel.darkThemeFlow.collectAsState(initial = true)
+
             AppTheme(isDark = isDark) {
                 val systemUiController = rememberSystemUiController()
 
@@ -66,11 +74,12 @@ class HomeActivity : ComponentActivity() {
 
     companion object {
         const val ARG_OPENED_FROM_NOTIFICATION = "opened_from_notification"
-        private const val APP_STORE_URL =
+        const val APP_STORE_URL =
             "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun HomeScreen(
     viewModel: HomeViewModel,
@@ -78,21 +87,49 @@ private fun HomeScreen(
     val timetableType = viewModel.timetableFlow.collectAsState()
     val scaffoldState = rememberScaffoldState()
 
+    val isUpdateNeeded = remember { UpdateChecker.isUpdateNeeded() }
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            TopBar(viewModel)
+            AnimatedVisibility(
+                visible = viewModel.showAppBar.value,
+                enter = expandVertically(Alignment.Top),
+                exit = shrinkVertically(Alignment.Top)
+            ) {
+                TopBar(viewModel)
+            }
         },
         bottomBar = {
-            BottomBar(
-                timetableType = timetableType.value,
-                onTimetableChange = { newTimetableType ->
-                    viewModel.switchTimetableType(newTimetableType)
-                }
-            )
+            AnimatedVisibility(
+                visible = viewModel.showAppBar.value,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                BottomBar(
+                    timetableType = timetableType.value,
+                    onTimetableChange = { newTimetableType ->
+                        viewModel.switchTimetableType(newTimetableType)
+                    }
+                )
+            }
         }
     ) {
         HomeContent(viewModel, scaffoldState.snackbarHostState)
+    }
+
+    if (isUpdateNeeded && !viewModel.hasSeenUpdateDialog.value) {
+        val ctx = LocalContext.current
+
+        UpdateDialog(
+            onDismiss = {
+                viewModel.hasSeenUpdateDialog.value = true
+            },
+            onConfirm = {
+                viewModel.hasSeenUpdateDialog.value = true
+                ctx.browseUrl(HomeActivity.APP_STORE_URL)
+            }
+        )
     }
 }
 
@@ -123,7 +160,6 @@ private fun TopBar(
                     contentDescription = null,
                 )
             }
-
         }
     )
 }
@@ -134,16 +170,18 @@ private fun HomeContent(
     snackbarHostState: SnackbarHostState
 ) = BoxWithConstraints(Modifier.fillMaxSize()) {
     val width = with(LocalDensity.current) { maxWidth.toPx() }
+
     val networkResult by viewModel.networkFlow.collectAsState()
-    val swipeState = rememberSwipeRefreshState(isRefreshing = networkResult is NetworkResult.Loading)
+    val swipeState =
+        rememberSwipeRefreshState(isRefreshing = networkResult is NetworkResult.Loading)
 
     val missingNetworkError = stringResource(id = R.string.error_network_connection)
     val downloadFailed = stringResource(id = R.string.error_download_failed)
 
     LaunchedEffect(networkResult) {
         @Suppress("UnnecessaryVariable") val result = networkResult
-        if (result is NetworkResult.Fail){
-            val message =  when(result.reason){
+        if (result is NetworkResult.Fail) {
+            val message = when (result.reason) {
                 NetworkResult.Fail.Reason.MissingNetworkConnection -> missingNetworkError
                 NetworkResult.Fail.Reason.DownloadFailed -> downloadFailed
             }
@@ -153,10 +191,12 @@ private fun HomeContent(
     }
 
     SwipeRefresh(
+        modifier = Modifier.fillMaxWidth(),
         state = swipeState,
         onRefresh = { },
         swipeEnabled = false,
     ) {
+        val renderingError = stringResource(id = R.string.error_rendering_failed)
 
         val timetableType by viewModel.timetableFlow.collectAsState()
         val darkMode by viewModel.darkThemeFlow.collectAsState(true)
@@ -165,16 +205,12 @@ private fun HomeContent(
         var offset by remember { mutableStateOf(Offset.Zero) }
         var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-
-
-//        val roundedScale =  // we round the number
         LaunchedEffect(width, timetableType, networkResult, ceil(scale).toInt(), darkMode) {
             try {
                 bitmap = viewModel.renderPdf(width.toInt(), ceil(scale), darkMode)
             } catch (_: OutOfMemoryError) {
             } catch (e: Exception) {
-                // TODO
-                // Many things can go wrong, but oh well, we'll just do nothing
+                snackbarHostState.showSnackbar(renderingError)
                 e.printStackTrace()
             }
         }
@@ -195,25 +231,21 @@ private fun HomeContent(
                         translationY = offset.y,
                     )
                     .pointerInput(Unit) {
-                        detectTransformGestures { centroid, pan, zoom, _ ->
+                        detectTransformGestures { _, pan, zoom, _ ->
                             scale = (scale * zoom).coerceIn(1f, 4.5f)
                             offset += (pan * scale)
                         }
                     }
                     .pointerInput(Unit) {
                         detectTapGestures(
-                            onLongPress = {
-                                scale
-                            }
-                        )
-                    }
-                    .pointerInput(Unit){
-                        detectTapGestures(
+                            onTap = {
+                                viewModel.showAppBar.value = !viewModel.showAppBar.value
+                            },
                             onDoubleTap = {
-                                if(scale>1)
-                                    scale = 1f
-                                else
-                                    scale = 2.5f
+                                scale = when {
+                                    scale > 1f -> 1f
+                                    else -> 2.5f
+                                }
                             }
                         )
                     },
@@ -223,6 +255,7 @@ private fun HomeContent(
         }
     }
 }
+
 @Composable
 private fun BottomBar(
     timetableType: TimetableType,
@@ -242,6 +275,7 @@ private fun BottomBar(
                 Text(
                     text = stringResource(id = R.string.high_school),
                     color = if (highSchoolSelected) MaterialTheme.colors.secondaryVariant else Color.Unspecified,
+                    fontWeight = FontWeight.Bold.takeIf { highSchoolSelected },
                 )
             }
         )
@@ -252,6 +286,7 @@ private fun BottomBar(
                 Text(
                     text = stringResource(id = R.string.middle_school),
                     color = if (middleSchoolSelected) MaterialTheme.colors.secondaryVariant else Color.Unspecified,
+                    fontWeight = FontWeight.Bold.takeIf { middleSchoolSelected },
                 )
             }
         )
@@ -268,4 +303,33 @@ fun BottomBarPreview() {
             timetableType = newTimetableType
         }
     }
+}
+
+@Composable
+private fun UpdateDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(id = R.string.update_available)) },
+        text = { Text(text = stringResource(id = R.string.update_available_desc)) },
+        buttons = {
+            Row(Modifier.fillMaxWidth().padding(16.dp)) {
+                TextButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = onDismiss,
+                ) {
+                    Text(text = stringResource(id = android.R.string.cancel))
+                }
+
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = onConfirm,
+                ) {
+                    Text(text = stringResource(id = R.string.action_update))
+                }
+            }
+        }
+    )
 }
