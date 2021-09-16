@@ -1,6 +1,7 @@
-package net.theluckycoder.stundenplan.utils
+package net.theluckycoder.stundenplan.notifications
 
 sealed class NetworkResult {
+
     class Success : NetworkResult() {
         override fun equals(other: Any?): Boolean = this === other
 

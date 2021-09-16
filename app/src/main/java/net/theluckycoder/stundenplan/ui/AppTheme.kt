@@ -7,10 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 object AppColors {
-    val Primary = Color(0xFFffca28)
-    val PrimaryVariant = Color(0xFFc79a00)
-    val Secondary = Color(0xFF76ff03)
-    val SecondaryVariant = Color(0xFF32cb00)
+    val Primary = Color(0xFFef6c00)
+    val PrimaryVariant = Color(0xFFb53d00)
+    val SecondaryLight = Color(0xFF00b0ff)
+    val Secondary = Color(0xFF00b0ff)
+    val SecondaryVariant = Color(0xFF0081cb)
 }
 
 private val LightColors = lightColors(
