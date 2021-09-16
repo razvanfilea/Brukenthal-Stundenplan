@@ -23,7 +23,7 @@ import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.repository.MainRepository
 import net.theluckycoder.stundenplan.utils.AppPreferences
 import net.theluckycoder.stundenplan.utils.FirebaseConstants
-import net.theluckycoder.stundenplan.notifications.NetworkResult
+import net.theluckycoder.stundenplan.model.NetworkResult
 import kotlin.math.roundToInt
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
@@ -58,7 +58,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             }
 
             launch {
-                val lastTimetable = preferences.timetableTypeFlow.first()
+                val lastTimetable = preferences.timetableType()
                 timetableStateFlow.value = lastTimetable
                 refresh()
             }
@@ -100,11 +100,11 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     suspend fun renderPdf(
         width: Int,
-        zoom: Float = 1.0f,
+        zoom: Int = 1,
         darkMode: Boolean = false
     ): Bitmap = withContext(Dispatchers.Default) {
 
-        val scaledWidth = (width * zoom).roundToInt()
+        val scaledWidth = (width * zoom)
 
         val bitmap = pdfRendererMutex.withLock {
             val pdfRenderer = lastPdfRenderer ?: withContext(Dispatchers.IO) {
@@ -127,7 +127,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             }
         }
 
-        Log.d("Pdf Render", "Rendered Bitmap (${bitmap.width}, ${bitmap.height}); Zoom ${zoom.roundToInt()}; DarkMode $darkMode")
+        Log.d("Pdf Render", "Rendered Bitmap (${bitmap.width}, ${bitmap.height}); Zoom $zoom; DarkMode $darkMode")
 
         if (darkMode) {
             val length = bitmap.width * bitmap.height

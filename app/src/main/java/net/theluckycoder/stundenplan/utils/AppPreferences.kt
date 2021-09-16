@@ -32,7 +32,6 @@ class AppPreferences(private val context: Application) {
 
     suspend fun timetableType(): TimetableType = timetableTypeFlow.first()
 
-
     suspend fun updateTimetableType(timetableType: TimetableType) =
         context.appDataStore.edit { preferences ->
             preferences[TIMETABLE_TYPE] = timetableType == TimetableType.HIGH_SCHOOL

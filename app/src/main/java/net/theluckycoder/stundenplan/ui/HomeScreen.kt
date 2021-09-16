@@ -36,7 +36,7 @@ import net.theluckycoder.stundenplan.BuildConfig
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.extensions.browseUrl
 import net.theluckycoder.stundenplan.model.TimetableType
-import net.theluckycoder.stundenplan.notifications.NetworkResult
+import net.theluckycoder.stundenplan.model.NetworkResult
 import net.theluckycoder.stundenplan.utils.Analytics
 import net.theluckycoder.stundenplan.utils.UpdateChecker
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
@@ -149,7 +149,7 @@ private fun TopBar(
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_switch_theme),
-                    contentDescription = null
+                    contentDescription = stringResource(id = R.string.action_switch_theme),
                 )
             }
             IconButton(onClick = {
@@ -157,7 +157,7 @@ private fun TopBar(
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_refresh),
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.action_refresh),
                 )
             }
         }
@@ -175,6 +175,7 @@ private fun HomeContent(
     val swipeState =
         rememberSwipeRefreshState(isRefreshing = networkResult is NetworkResult.Loading)
 
+    val actionRetry = stringResource(id = R.string.action_retry)
     val missingNetworkError = stringResource(id = R.string.error_network_connection)
     val downloadFailed = stringResource(id = R.string.error_download_failed)
 
@@ -186,7 +187,10 @@ private fun HomeContent(
                 NetworkResult.Fail.Reason.DownloadFailed -> downloadFailed
             }
 
-            snackbarHostState.showSnackbar(message)
+            val snackbarResult = snackbarHostState.showSnackbar(message, actionRetry)
+            if (snackbarResult == SnackbarResult.ActionPerformed) {
+                viewModel.refresh()
+            }
         }
     }
 
@@ -205,9 +209,10 @@ private fun HomeContent(
         var offset by remember { mutableStateOf(Offset.Zero) }
         var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-        LaunchedEffect(width, timetableType, networkResult, ceil(scale).toInt(), darkMode) {
+        val roundedScale = ceil(scale).toInt()
+        LaunchedEffect(width, timetableType, networkResult, roundedScale, darkMode) {
             try {
-                bitmap = viewModel.renderPdf(width.toInt(), ceil(scale), darkMode)
+                bitmap = viewModel.renderPdf(width.toInt(), roundedScale, darkMode)
             } catch (_: OutOfMemoryError) {
             } catch (e: Exception) {
                 snackbarHostState.showSnackbar(renderingError)
@@ -315,12 +320,15 @@ private fun UpdateDialog(
         title = { Text(text = stringResource(id = R.string.update_available)) },
         text = { Text(text = stringResource(id = R.string.update_available_desc)) },
         buttons = {
-            Row(Modifier.fillMaxWidth().padding(16.dp)) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)) {
                 TextButton(
                     modifier = Modifier.weight(1f),
                     onClick = onDismiss,
                 ) {
-                    Text(text = stringResource(id = android.R.string.cancel))
+                    Text(text = stringResource(id = R.string.action_ignore))
                 }
 
                 Button(

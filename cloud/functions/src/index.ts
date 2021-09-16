@@ -36,10 +36,14 @@ const TITLES = [
     "Neue Veränderungen im Stundenplan!"
 ];
 const MESSAGES = [
-    "Aww man!",
+    "Creeper! Aww man!",
     "Some people call this junk. Me? I call it treasure",
     "Geschwindigkeit und Prezision!",
-    "I used to be an adventurer like you, then I took an arrow to the knee.",
+    "The risk I took was calculated but man am I bad at math",
+    "Minim de efort maxim de eficiență",
+    "Let the suffering begin",
+    "Ani trec robotica rămâne",
+    "No I don't think I will"
 ];
 
 /// Structures

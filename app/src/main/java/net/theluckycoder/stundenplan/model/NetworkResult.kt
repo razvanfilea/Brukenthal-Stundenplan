@@ -1,4 +1,4 @@
-package net.theluckycoder.stundenplan.notifications
+package net.theluckycoder.stundenplan.model
 
 sealed class NetworkResult {
 

@@ -9,7 +9,7 @@ import kotlinx.coroutines.tasks.await
 import net.theluckycoder.stundenplan.model.Timetable
 import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.utils.FirebaseConstants
-import net.theluckycoder.stundenplan.notifications.NetworkResult
+import net.theluckycoder.stundenplan.model.NetworkResult
 import net.theluckycoder.stundenplan.utils.getConfigKey
 import retrofit2.Retrofit
 import retrofit2.create
