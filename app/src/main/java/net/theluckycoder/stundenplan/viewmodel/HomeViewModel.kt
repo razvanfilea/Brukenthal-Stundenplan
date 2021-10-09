@@ -13,18 +13,20 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.theluckycoder.stundenplan.BuildConfig
 import net.theluckycoder.stundenplan.extensions.app
 import net.theluckycoder.stundenplan.extensions.isNetworkAvailable
+import net.theluckycoder.stundenplan.model.NetworkResult
 import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.repository.MainRepository
 import net.theluckycoder.stundenplan.utils.AppPreferences
 import net.theluckycoder.stundenplan.utils.FirebaseConstants
-import net.theluckycoder.stundenplan.model.NetworkResult
-import kotlin.math.roundToInt
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
 

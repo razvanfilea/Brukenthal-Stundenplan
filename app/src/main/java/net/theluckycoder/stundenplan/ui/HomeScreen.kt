@@ -35,12 +35,15 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import net.theluckycoder.stundenplan.BuildConfig
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.extensions.browseUrl
-import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.model.NetworkResult
+import net.theluckycoder.stundenplan.model.TimetableType
+import net.theluckycoder.stundenplan.ui.zoomable.Zoomable
+import net.theluckycoder.stundenplan.ui.zoomable.rememberZoomableState
 import net.theluckycoder.stundenplan.utils.Analytics
 import net.theluckycoder.stundenplan.utils.UpdateChecker
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
-import kotlin.math.ceil
+import java.lang.Integer.min
+import kotlin.math.roundToInt
 
 class HomeActivity : ComponentActivity() {
 
@@ -169,7 +172,9 @@ private fun HomeContent(
     viewModel: HomeViewModel,
     snackbarHostState: SnackbarHostState
 ) = BoxWithConstraints(Modifier.fillMaxSize()) {
-    val width = with(LocalDensity.current) { maxWidth.toPx() }
+    val screenWidth = with(LocalDensity.current) { maxWidth.roundToPx() }
+    val screenHeight = with(LocalDensity.current) { maxHeight.roundToPx() }
+    val renderWidth = minOf(screenWidth, screenHeight)
 
     val networkResult by viewModel.networkFlow.collectAsState()
     val swipeState =
@@ -205,58 +210,47 @@ private fun HomeContent(
         val timetableType by viewModel.timetableFlow.collectAsState()
         val darkMode by viewModel.darkThemeFlow.collectAsState(true)
 
-        var scale by remember { mutableStateOf(1f) }
-        var offset by remember { mutableStateOf(Offset.Zero) }
+        val zoomableState = rememberZoomableState(
+            maxScale = 4.4f
+        )
         var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-        val roundedScale = ceil(scale).toInt()
-        LaunchedEffect(width, timetableType, networkResult, roundedScale, darkMode) {
+        LaunchedEffect(timetableType) {
+            zoomableState.animateScaleTo(1f)
+        }
+
+        val roundedScale = zoomableState.scale.roundToInt()
+        LaunchedEffect(renderWidth, timetableType, networkResult, roundedScale, darkMode) {
             try {
-                bitmap = viewModel.renderPdf(width.toInt(), roundedScale, darkMode)
+                bitmap = viewModel.renderPdf(renderWidth, roundedScale, darkMode)
             } catch (_: OutOfMemoryError) {
             } catch (e: Exception) {
-                snackbarHostState.showSnackbar(renderingError)
-                e.printStackTrace()
+                if (networkResult !is NetworkResult.Loading) {
+                    snackbarHostState.showSnackbar(renderingError)
+                    e.printStackTrace()
+                }
             }
         }
 
-        LaunchedEffect(timetableType) {
-            scale = 1f
-            offset = Offset.Zero
-        }
-
         if (bitmap != null) {
-            Image(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer(
-                        scaleX = scale,
-                        scaleY = scale,
-                        translationX = offset.x,
-                        translationY = offset.y,
-                    )
-                    .pointerInput(Unit) {
-                        detectTransformGestures { _, pan, zoom, _ ->
-                            scale = (scale * zoom).coerceIn(1f, 4.5f)
-                            offset += (pan * scale)
-                        }
+            Zoomable(
+                state = zoomableState,
+                onTap = {
+                    viewModel.showAppBar.value = !viewModel.showAppBar.value
+                },
+                doubleTapScale = {
+                    when {
+                        zoomableState.scale > 1f -> 1f
+                        else -> 2.5f
                     }
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = {
-                                viewModel.showAppBar.value = !viewModel.showAppBar.value
-                            },
-                            onDoubleTap = {
-                                scale = when {
-                                    scale > 1f -> 1f
-                                    else -> 2.5f
-                                }
-                            }
-                        )
-                    },
-                bitmap = bitmap!!.asImageBitmap(),
-                contentDescription = null
-            )
+                }
+            ) {
+                Image(
+                    modifier = Modifier.fillMaxSize(),
+                    bitmap = bitmap!!.asImageBitmap(),
+                    contentDescription = null
+                )
+            }
         }
     }
 }
@@ -323,7 +317,8 @@ private fun UpdateDialog(
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)) {
+                    .padding(16.dp)
+            ) {
                 TextButton(
                     modifier = Modifier.weight(1f),
                     onClick = onDismiss,
