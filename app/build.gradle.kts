@@ -76,7 +76,7 @@ dependencies {
 
     // AndroidX
     implementation("androidx.activity:activity-ktx:1.4.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     // Compose
