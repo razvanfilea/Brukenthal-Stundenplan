@@ -93,7 +93,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}")
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:29.0.2"))
+    implementation(platform("com.google.firebase:firebase-bom:29.0.3"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-config-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
