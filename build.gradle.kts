@@ -2,6 +2,7 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { setUrl("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
     }
 
     dependencies {
@@ -17,6 +18,7 @@ allprojects {
         google()
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
+        maven { setUrl("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
     }
 }
 

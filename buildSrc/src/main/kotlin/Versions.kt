@@ -14,8 +14,9 @@ object Versions {
         const val target = 31
     }
 
-    const val kotlin = "1.5.31"
-    const val kotlinCoroutines = "1.5.2"
-    const val compose = "1.0.4"
-    const val accompanist = "0.20.0"
+    const val kotlin = "1.6.10"
+    const val kotlinCoroutines = "1.6.0"
+    const val compose = "1.1.0-rc01"
+    const val composeCompiler = "1.1.0-rc02"
+    const val accompanist = "0.22.0-rc"
 }
