@@ -36,6 +36,8 @@
     <string name="menu_grades">Grades</string>
 
     <!-- Grades -->
+    <string name="grades_explanation_title">What\'s this?</string>
+    <string name="grades_explanation">Enter your grades here to keep an overview of them and your averages.</string>
     <string name="grades_subject">Subject</string>
     <string name="grades_semester_ct">Semester %d</string>
     <string name="grades_general_average">General Average: %.2f</string>
@@ -43,7 +45,6 @@
     <string name="grades_average">Average: %d</string>
     <string name="grades_list">Grades: %s</string>
     <string name="grades_semester_paper">Semester Paper: %d</string>
-
     <string name="grades_delete_title">Do you want to delete %s?</string>
     <string name="grades_delete_desc">Doing this will remove the subject along with its grades from both semesters.</string>
 </resources>

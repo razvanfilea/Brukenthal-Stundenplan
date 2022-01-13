@@ -9,7 +9,6 @@ plugins {
 
 android {
     compileSdk = Versions.Sdk.compile
-    buildToolsVersion = "31.0.0"
 
     defaultConfig {
         applicationId = "net.theluckycoder.stundenplan"
@@ -98,8 +97,6 @@ dependencies {
 
     // Voyager
     implementation("cafe.adriel.voyager:voyager-navigator:${Versions.voyager}")
-    implementation("cafe.adriel.voyager:voyager-transitions:${Versions.voyager}")
-    implementation("cafe.adriel.voyager:voyager-androidx:${Versions.voyager}")
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:29.0.3"))

@@ -21,7 +21,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.transitions.FadeTransition
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.theluckycoder.stundenplan.R
@@ -83,9 +82,7 @@ object MainScreen : Screen {
                 },
                 frontLayerContent = {
                     CompositionLocalProvider(LocalSnackbarHostState provides scaffoldState.snackbarHostState) {
-                        FadeTransition(navigator = navigator) {
-                            CurrentScreen()
-                        }
+                        CurrentScreen()
                     }
                 },
             )

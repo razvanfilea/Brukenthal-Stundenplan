@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,22 +52,39 @@ class GradesScreen : Screen {
 
         Scaffold(
             floatingActionButton = {
-                AddButton(onClick = {
+                FloatingActionButton(onClick = {
                     viewModel.showEditSubjectDialog.value = Subject()
-                })
+                }) { Icon(Icons.Default.Add, contentDescription = null) }
             },
+            floatingActionButtonPosition = FabPosition.Center,
+            isFloatingActionButtonDocked = true,
             topBar = { TopBar(selectedSemester, semesterAverage) },
             bottomBar = { BottomBar(selectedSemester, viewModel) }
         ) { _ ->
-            Crossfade(targetState = selectedSemester) { semester ->
-                SubjectsList(
-                    subjects = subjects,
-                    semester = semester,
-                    onClickSubject = { viewModel.showEditSubjectDialog.value = it },
-                    onLongClickSubject = { viewModel.showDeleteSubjectDialog.value = it },
-                )
+            if (subjects.isEmpty()) {
+                Card(
+                    Modifier.padding(8.dp),
+                    elevation = 4.dp,
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text(
+                            stringResource(R.string.grades_explanation_title),
+                            style = MaterialTheme.typography.h6
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(stringResource(R.string.grades_explanation))
+                    }
+                }
+            } else {
+                Crossfade(targetState = selectedSemester) { semester ->
+                    SubjectsList(
+                        subjects = subjects,
+                        semester = semester,
+                        onClickSubject = { viewModel.showEditSubjectDialog.value = it },
+                        onLongClickSubject = { viewModel.showDeleteSubjectDialog.value = it },
+                    )
+                }
             }
-
         }
 
         val subjectToEdit = viewModel.showEditSubjectDialog.value
@@ -106,19 +125,16 @@ class GradesScreen : Screen {
             AnimatedContent(
                 targetState = if (selectedSemester == Subject.Semester.ONE) semesterAverage.first else semesterAverage.second
             ) { target ->
-                Text(
-                    stringResource(R.string.grades_semester_average, target)
-                )
+                Text(stringResource(R.string.grades_semester_average, target))
             }
 
             val annualAverage = remember(semesterAverage) {
-                semesterAverage.toList().filterNot { it == 0f }.average()
+                semesterAverage.toList()
+                    .filterNot { it == 0f }.average().takeIf { it.isFinite() } ?: 0f
             }
 
             AnimatedContent(targetState = annualAverage) { target ->
-                Text(
-                    stringResource(R.string.grades_general_average, target)
-                )
+                Text(stringResource(R.string.grades_general_average, target))
             }
         }
     }
@@ -180,7 +196,10 @@ class GradesScreen : Screen {
         ) {
             items(subjects) {
                 key(it) {
-                    Card(Modifier.padding(8.dp)) {
+                    Card(
+                        Modifier.padding(8.dp),
+                        elevation = 4.dp,
+                    ) {
                         Box(
                             Modifier.combinedClickable(
                                 onClick = { onClickSubject(it) },
@@ -210,12 +229,18 @@ class GradesScreen : Screen {
                     fontWeight = FontWeight.Bold
                 )
 
-                Text(
-                    stringResource(R.string.grades_average, grades.average),
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Spacer(Modifier.width(8.dp))
+
+                if (grades.average != 0) {
+                    Text(
+                        stringResource(R.string.grades_average, grades.average),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
+
+            Spacer(Modifier.height(4.dp))
 
             Row(
                 Modifier.fillMaxWidth(),
@@ -224,18 +249,11 @@ class GradesScreen : Screen {
                 val gradesString = grades.grades.filter { it != 0 }.joinToString(", ")
                 Text(stringResource(R.string.grades_list, gradesString))
 
+                Spacer(Modifier.width(4.dp))
+
                 if (grades.semesterPaper != 0)
                     Text(stringResource(R.string.grades_semester_paper, grades.semesterPaper))
             }
-        }
-    }
-
-    @Composable
-    private fun AddButton(onClick: () -> Unit) {
-        FloatingActionButton(
-            onClick = onClick
-        ) {
-            Icon(Icons.Default.Add, contentDescription = null)
         }
     }
 
@@ -260,16 +278,18 @@ class GradesScreen : Screen {
                     gradesList.add(0)
             }
         }
-//AlertDialog(onDismissRequest = { /*TODO*/ }, confirmButton = )
+
         Dialog(
             onDismissRequest = onDismiss,
             properties = DialogProperties(usePlatformDefaultWidth = false),
         ) {
+            val numberKeyboard = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            )
+
             Surface(Modifier.padding(8.dp), shape = RoundedCornerShape(6.dp)) {
                 Column(Modifier.padding(8.dp)) {
-                    val numberKeyboard = remember {
-                        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
-                    }
 
                     val modifier = Modifier
                         .fillMaxWidth()
@@ -282,6 +302,10 @@ class GradesScreen : Screen {
                         onValueChange = { name = it },
                         label = { Text("Subject Name") },
                         singleLine = true,
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            capitalization = KeyboardCapitalization.Words,
+                            imeAction = ImeAction.Next
+                        ),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 6.dp)///.padding(top = 16.dp),

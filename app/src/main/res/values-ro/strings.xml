@@ -39,4 +39,6 @@
     <string name="menu_grades">Note</string>
     <string name="grades_delete_desc">Materia împreună cu notele sale vor fi ștearse din ambele semestre.</string>
     <string name="grades_general_average">Media generală: %.2f</string>
+    <string name="grades_explanation">Introduceți notele dvs. aici pentru a păstra o imagine de ansamblu asupra lor și a mediilor dvs.</string>
+    <string name="grades_explanation_title">Ce e asta?</string>
 </resources>
