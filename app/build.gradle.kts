@@ -69,6 +69,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":grades"))
+
     // Kotlin
     kotlin("stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.kotlinCoroutines}")
@@ -84,7 +86,9 @@ dependencies {
     implementation("androidx.compose.ui:ui:${Versions.compose}")
     implementation("androidx.compose.foundation:foundation:${Versions.compose}")
     implementation("androidx.compose.material:material:${Versions.compose}")
+    implementation("androidx.compose.animation:animation-graphics:${Versions.compose}")
     implementation("androidx.compose.ui:ui-tooling-preview:${Versions.compose}")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0")
     debugImplementation("androidx.compose.ui:ui-tooling:${Versions.compose}")
     debugImplementation(kotlin("reflect"))
 
@@ -92,12 +96,19 @@ dependencies {
     implementation("com.google.accompanist:accompanist-swiperefresh:${Versions.accompanist}")
     implementation("com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}")
 
+    // Voyager
+    implementation("cafe.adriel.voyager:voyager-navigator:${Versions.voyager}")
+    implementation("cafe.adriel.voyager:voyager-transitions:${Versions.voyager}")
+    implementation("cafe.adriel.voyager:voyager-androidx:${Versions.voyager}")
+
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:29.0.3"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-config-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")
+
+    implementation("androidx.browser:browser:1.4.0")
 
     // Other
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

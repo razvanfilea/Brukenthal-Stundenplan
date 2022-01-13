@@ -25,4 +25,14 @@
     <!-- Update -->
     <string name="update_available">Aktualisierung verfügbar</string>
     <string name="update_available_desc">Eine neue Aktualisierung für Brukplan ist verfügbar</string>
+    <string name="action_save">Speichern</string>
+    <string name="action_delete">Löschen</string>
+    <string name="grades_subject">Fach</string>
+    <string name="grades_semester_ct">Semester %d</string>
+    <string name="grades_semester_paper">Semesterarbeit: %d</string>
+    <string name="grades_average">Mittelnote: %d</string>
+    <string name="menu_timetable">Stundenplan</string>
+    <string name="menu_news">Informationen</string>
+    <string name="grades_list">Noten: %s</string>
+    <string name="menu_grades">Noten</string>
 </resources>

@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.repository.MainRepository
-import net.theluckycoder.stundenplan.ui.HomeActivity
+import net.theluckycoder.stundenplan.ui.MainActivity
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 class NotificationService : FirebaseMessagingService() {
@@ -59,9 +59,9 @@ class NotificationService : FirebaseMessagingService() {
     }
 
     private fun getActivityPendingIntent(): PendingIntent {
-        val intent = Intent(this, HomeActivity::class.java)
+        val intent = Intent(this, MainActivity::class.java)
 
-        intent.putExtra(HomeActivity.ARG_OPENED_FROM_NOTIFICATION, true)
+        intent.putExtra(MainActivity.ARG_OPENED_FROM_NOTIFICATION, true)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
         return PendingIntent.getActivity(

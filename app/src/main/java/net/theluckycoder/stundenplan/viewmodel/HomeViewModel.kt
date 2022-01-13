@@ -15,7 +15,6 @@ import com.google.firebase.messaging.ktx.messaging
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -35,16 +34,17 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     private var lastPdfRenderer: PdfRenderer? = null
 
-    private val timetableStateFlow = MutableStateFlow(TimetableType.HIGH_SCHOOL)
-    val timetableFlow = timetableStateFlow.asStateFlow()
+    private val _timetableStateFlow = MutableStateFlow(TimetableType.HIGH_SCHOOL)
+    val timetableStateFlow = _timetableStateFlow.asStateFlow()
 
-    private val networkStateFlow = MutableStateFlow<NetworkResult?>(null)
-    val networkFlow = networkStateFlow.asStateFlow()
+    private val _networkStateFlow = MutableStateFlow<NetworkResult?>(null)
+    val networkStateFlow = _networkStateFlow.asStateFlow()
 
     val darkThemeFlow = preferences.darkThemeFlow
+    val hasFinishedScaffoldTutorialFlow = preferences.hasFinishedScaffoldTutorialFlow
 
-    val hasSeenUpdateDialog = mutableStateOf(false)
-    val showAppBar = mutableStateOf(true)
+    val hasSeenUpdateDialogState = mutableStateOf(false)
+    val showAppBarState = mutableStateOf(true)
 
     // region Mutexes
 
@@ -55,13 +55,11 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch {
-            launch {
-                subscribeToFirebaseTopics()
-            }
+            launch { subscribeToFirebaseTopics() }
 
             launch {
                 val lastTimetable = preferences.timetableType()
-                timetableStateFlow.value = lastTimetable
+                _timetableStateFlow.value = lastTimetable
                 refresh()
             }
         }
@@ -75,7 +73,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                 downloadTimetable()
             } else {
                 // Let the user know that we can't download a newer timetable
-                networkStateFlow.value =
+                _networkStateFlow.value =
                     NetworkResult.Fail(NetworkResult.Fail.Reason.MissingNetworkConnection)
             }
         }
@@ -86,7 +84,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun switchTimetableType(newTimetableType: TimetableType) {
-        timetableStateFlow.value = newTimetableType
+        _timetableStateFlow.value = newTimetableType
         refresh()
 
         viewModelScope.launch(Dispatchers.Default) {
@@ -100,6 +98,12 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun finishedScaffoldTutorial() {
+        viewModelScope.launch(Dispatchers.IO) {
+            preferences.finishedScaffoldTutorial()
+        }
+    }
+
     suspend fun renderPdf(
         width: Int,
         zoom: Int = 1,
@@ -110,7 +114,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
         val bitmap = pdfRendererMutex.withLock {
             val pdfRenderer = lastPdfRenderer ?: withContext(Dispatchers.IO) {
-                getNewPdfRenderer(timetableStateFlow.value)
+                getNewPdfRenderer(_timetableStateFlow.value)
             }
 
             lastPdfRenderer = pdfRenderer
@@ -129,7 +133,9 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             }
         }
 
-        Log.d("Pdf Render", "Rendered Bitmap (${bitmap.width}, ${bitmap.height}); Zoom $zoom; DarkMode $darkMode")
+        if (BuildConfig.DEBUG) {
+            Log.d("Pdf Render", "Rendered Bitmap (${bitmap.width}, ${bitmap.height}); Zoom $zoom; DarkMode $darkMode")
+        }
 
         if (darkMode) {
             val length = bitmap.width * bitmap.height
@@ -162,10 +168,10 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private suspend fun downloadTimetable() = coroutineScope {
-        val type = timetableFlow.value
+        val type = timetableStateFlow.value
 
         // Let the user know that we are starting the download
-        networkStateFlow.value = NetworkResult.Loading()
+        _networkStateFlow.value = NetworkResult.Loading()
 
         try {
             val timetable = repository.getTimetable(type)
@@ -178,17 +184,17 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                     .flowOn(Dispatchers.IO)
                     .collect { networkResult ->
                         ensureActive()
-                        networkStateFlow.value = networkResult
+                        _networkStateFlow.value = networkResult
                     }
             } else {
-                networkStateFlow.value = NetworkResult.Success()
+                _networkStateFlow.value = NetworkResult.Success()
             }
 
             Log.i(PDF_TAG, "Finished downloading")
         } catch (e: Exception) {
             Log.e(PDF_TAG, "Failed to download for $type", e)
 
-            networkStateFlow.value =
+            _networkStateFlow.value =
                 NetworkResult.Fail(NetworkResult.Fail.Reason.DownloadFailed)
         }
     }

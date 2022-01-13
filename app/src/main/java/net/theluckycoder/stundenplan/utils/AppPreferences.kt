@@ -37,11 +37,18 @@ class AppPreferences(private val context: Application) {
             preferences[TIMETABLE_TYPE] = timetableType == TimetableType.HIGH_SCHOOL
         }
 
+    val hasFinishedScaffoldTutorialFlow: Flow<Boolean> = context.appDataStore.data
+        .map { it[TUTORIAL_SCAFFOLD] ?: false }
+
+    suspend fun finishedScaffoldTutorial() = context.appDataStore.edit { it[TUTORIAL_SCAFFOLD] = true }
+
     companion object {
         private const val DATA_STORE_NAME = "user_prefs"
 
         private val DARK_THEME = booleanPreferencesKey("dark_theme")
         private val TIMETABLE_TYPE = booleanPreferencesKey("timetable_type")
+
+        private val TUTORIAL_SCAFFOLD = booleanPreferencesKey("tutorial_scaffold")
 
         private val Context.appDataStore by preferencesDataStore(DATA_STORE_NAME)
     }

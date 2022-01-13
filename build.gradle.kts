@@ -2,11 +2,12 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        gradlePluginPortal()
         maven { setUrl("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:7.0.4")
+        classpath("com.android.tools.build:gradle:7.1.0-rc01")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}")
         classpath("com.google.gms:google-services:4.3.10")
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.8.1")
@@ -17,6 +18,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        gradlePluginPortal()
         maven { url = uri("https://jitpack.io") }
         maven { setUrl("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
     }

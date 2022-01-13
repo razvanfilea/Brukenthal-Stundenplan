@@ -19,4 +19,5 @@ object Versions {
     const val compose = "1.1.0-rc01"
     const val composeCompiler = "1.1.0-rc02"
     const val accompanist = "0.22.0-rc"
+    const val voyager = "1.0.0-beta14"
 }
