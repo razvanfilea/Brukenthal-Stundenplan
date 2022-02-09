@@ -87,7 +87,7 @@ dependencies {
     implementation("androidx.compose.material:material:${Versions.compose}")
     implementation("androidx.compose.animation:animation-graphics:${Versions.compose}")
     implementation("androidx.compose.ui:ui-tooling-preview:${Versions.compose}")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1")
     debugImplementation("androidx.compose.ui:ui-tooling:${Versions.compose}")
     debugImplementation(kotlin("reflect"))
 
