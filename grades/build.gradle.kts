@@ -33,6 +33,6 @@ android {
 dependencies {
     kotlin("stdlib-jdk8")
 
-    implementation("androidx.room:room-ktx:2.4.1")
+    implementation("androidx.room:room-ktx:2.4.2")
     ksp("androidx.room:room-compiler:2.4.2")
 }
