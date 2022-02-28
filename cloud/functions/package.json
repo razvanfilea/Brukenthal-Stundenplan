@@ -14,20 +14,20 @@
   },
   "main": "lib/index.js",
   "dependencies": {
-    "@types/jsdom": "^16.2.4",
-    "firebase-admin": "^9.11.1",
-    "firebase-functions": "^3.15.7",
-    "jsdom": "^16.4.0",
-    "node-fetch": "^2.6.2",
-    "optionator": "^0.9.1"
+    "@types/jsdom": "16.2.13",
+    "firebase-admin": "9.11.1",
+    "firebase-functions": "3.15.7",
+    "jsdom": "16.7.0",
+    "node-fetch": "2.6.2",
+    "optionator": "0.9.1"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^3.10.1",
-    "@typescript-eslint/parser": "^3.10.1",
-    "eslint": "^7.32.0",
-    "eslint-plugin-import": "^2.24.2",
-    "firebase-functions-test": "^0.3.2",
-    "typescript": "^3.9.10"
+    "@typescript-eslint/eslint-plugin": "3.10.1",
+    "@typescript-eslint/parser": "3.10.1",
+    "eslint": "7.32.0",
+    "eslint-plugin-import": "2.24.2",
+    "firebase-functions-test": "0.3.2",
+    "typescript": "3.9.10"
   },
   "private": true
 }
