@@ -15,7 +15,7 @@
   "main": "lib/index.js",
   "dependencies": {
     "@types/jsdom": "16.2.14",
-    "firebase-admin": "9.11.1",
+    "firebase-admin": "9.12.0",
     "firebase-functions": "3.18.1",
     "jsdom": "16.7.0",
     "node-fetch": "2.6.2",
