@@ -41,4 +41,7 @@
     <string name="grades_explanation_title">Was ist das?</string>
     <string name="grades_general_average">Mittelnote: %.2f</string>
     <string name="grades_semester_average">Semestermittelnote: %.2f</string>
+    <string name="grades_hint_subject">Fachname</string>
+    <string name="grades_hint_semester_paper">Semesterarbeit</string>
+    <string name="grades_hint_grade">Note %d</string>
 </resources>

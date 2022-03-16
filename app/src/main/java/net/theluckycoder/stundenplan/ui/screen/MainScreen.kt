@@ -1,5 +1,6 @@
 package net.theluckycoder.stundenplan.ui.screen
 
+import android.content.ActivityNotFoundException
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -66,10 +67,14 @@ object MainScreen : Screen {
                             icon = painterResource(R.drawable.ic_news),
                             text = stringResource(R.string.menu_news)
                         ) {
-                            CustomTabsIntent.Builder()
-                                .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-                                .build()
-                                .launchUrl(ctx, Uri.parse("https://brukenthal.ro/noutati/"))
+                            try {
+                                CustomTabsIntent.Builder()
+                                    .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+                                    .build()
+                                    .launchUrl(ctx, Uri.parse(NEWS_URL))
+                            } catch (e: ActivityNotFoundException) {
+                                ctx.browseUrl(NEWS_URL)
+                            }
                         }
 
                         BackdropButton(
@@ -201,6 +206,8 @@ object MainScreen : Screen {
             elevation = 0.dp
         )
     }
+
+    private const val NEWS_URL = "https://brukenthal.ro/noutati/"
 }
 
 @Composable

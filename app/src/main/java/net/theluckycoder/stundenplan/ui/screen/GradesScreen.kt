@@ -60,29 +60,31 @@ class GradesScreen : Screen {
             isFloatingActionButtonDocked = true,
             topBar = { TopBar(selectedSemester, semesterAverage) },
             bottomBar = { BottomBar(selectedSemester, viewModel) }
-        ) { _ ->
-            if (subjects.isEmpty()) {
-                Card(
-                    Modifier.padding(8.dp),
-                    elevation = 4.dp,
-                ) {
-                    Column(Modifier.padding(16.dp)) {
-                        Text(
-                            stringResource(R.string.grades_explanation_title),
-                            style = MaterialTheme.typography.h6
-                        )
-                        Spacer(Modifier.height(2.dp))
-                        Text(stringResource(R.string.grades_explanation))
+        ) { contentPadding ->
+            Box(Modifier.padding(contentPadding)) {
+                if (subjects.isEmpty()) {
+                    Card(
+                        Modifier.padding(8.dp),
+                        elevation = 4.dp,
+                    ) {
+                        Column(Modifier.padding(16.dp)) {
+                            Text(
+                                stringResource(R.string.grades_explanation_title),
+                                style = MaterialTheme.typography.h6
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            Text(stringResource(R.string.grades_explanation))
+                        }
                     }
-                }
-            } else {
-                Crossfade(targetState = selectedSemester) { semester ->
-                    SubjectsList(
-                        subjects = subjects,
-                        semester = semester,
-                        onClickSubject = { viewModel.showEditSubjectDialog.value = it },
-                        onLongClickSubject = { viewModel.showDeleteSubjectDialog.value = it },
-                    )
+                } else {
+                    Crossfade(targetState = selectedSemester) { semester ->
+                        SubjectsList(
+                            subjects = subjects,
+                            semester = semester,
+                            onClickSubject = { viewModel.showEditSubjectDialog.value = it },
+                            onLongClickSubject = { viewModel.showDeleteSubjectDialog.value = it },
+                        )
+                    }
                 }
             }
         }
@@ -115,12 +117,11 @@ class GradesScreen : Screen {
         selectedSemester: Subject.Semester,
         semesterAverage: Pair<Float, Float>
     ) {
-        Row(
+        Column(
             Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colors.surface)
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             AnimatedContent(
                 targetState = if (selectedSemester == Subject.Semester.ONE) semesterAverage.first else semesterAverage.second
@@ -132,6 +133,8 @@ class GradesScreen : Screen {
                 semesterAverage.toList()
                     .filterNot { it == 0f }.average().takeIf { it.isFinite() } ?: 0f
             }
+
+            Spacer(Modifier.height(2.dp))
 
             AnimatedContent(targetState = annualAverage) { target ->
                 Text(stringResource(R.string.grades_general_average, target))
@@ -193,6 +196,7 @@ class GradesScreen : Screen {
         LazyVerticalGrid(
             cells = GridCells.Fixed(count),
             modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 32.dp)
         ) {
             items(subjects) {
                 key(it) {
@@ -300,7 +304,7 @@ class GradesScreen : Screen {
                     TextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("Subject Name") },
+                        label = { Text(stringResource(R.string.grades_hint_subject)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions.Default.copy(
                             capitalization = KeyboardCapitalization.Words,
@@ -314,7 +318,7 @@ class GradesScreen : Screen {
                     TextField(
                         value = if (semesterPaper != 0) semesterPaper.toString() else "",
                         onValueChange = { semesterPaper = it.toGrade() },
-                        label = { Text("Semester Paper") },
+                        label = { Text(stringResource(R.string.grades_hint_semester_paper)) },
                         singleLine = true,
                         keyboardOptions = numberKeyboard,
                         modifier = modifier,
@@ -336,7 +340,7 @@ class GradesScreen : Screen {
                                 TextField(
                                     value = if (grade != 0) grade.toString() else "",
                                     onValueChange = { gradesList[index] = it.toGrade() },
-                                    label = { Text("Grade ${index + 1}") },
+                                    label = { Text(stringResource(R.string.grades_hint_grade,index + 1)) },
                                     singleLine = true,
                                     keyboardOptions = numberKeyboard,
                                     modifier = Modifier

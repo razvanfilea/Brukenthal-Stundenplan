@@ -41,4 +41,7 @@
     <string name="grades_general_average">Media generală: %.2f</string>
     <string name="grades_explanation">Introduceți notele dvs. aici pentru a păstra o imagine de ansamblu asupra lor și a mediilor dvs.</string>
     <string name="grades_explanation_title">Ce e asta?</string>
+    <string name="grades_hint_subject">Numele materiei</string>
+    <string name="grades_hint_grade">Nota %d</string>
+    <string name="grades_hint_semester_paper">Teză</string>
 </resources>
