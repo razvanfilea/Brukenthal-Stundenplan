@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-const fetch = require('node-fetch');
-// import {fetch} from 'node-fetch';
+import fetch from "node-fetch";
+// import fetch from "node-fetch";
 import {JSDOM} from 'jsdom';
 
 admin.initializeApp();
@@ -41,7 +41,7 @@ const MESSAGES = [
     "Geschwindigkeit und Prezision!",
     "The risk I took was calculated but man am I bad at math",
     "Minim de efort maxim de eficiență",
-    "Let the suffering begin",
+    "Haide mai bine, să nu",
     "Ani trec robotica rămâne",
     "No I don't think I will"
 ];
