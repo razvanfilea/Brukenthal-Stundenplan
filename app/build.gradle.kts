@@ -99,7 +99,7 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-navigator:${Versions.voyager}")
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:29.1.0"))
+    implementation(platform("com.google.firebase:firebase-bom:29.2.1"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-config-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
