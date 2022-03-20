@@ -29,21 +29,24 @@ const CHANNEL_ID_MIDDLE_SCHOOL = "middle_school";
  * The titles and messages used for notifications
  */
 const TITLES = [
-    "Der Stundenplan hat sich verändert!",
+    "Der Stundenplan wurde geändert!",
     "Ein neuer Stundenplan ist da",
-    "Achtung Stundenplanveränderung!",
+    "Achtung, neuer Stundenplan!",
+    "Achtung, Stundenplanänderung!",
+    "Stundenplan erneut geändert!",
     "Der Stundenplan ist aktualisiert",
-    "Neue Veränderungen im Stundenplan!"
+    "Ein neuer Stundenplan wurde hochgeladen."
 ];
 const MESSAGES = [
     "Creeper! Aww man!",
     "Some people call this junk. Me? I call it treasure",
-    "Geschwindigkeit und Prezision!",
+    "Geschwindigkeit und Präzision!",
     "The risk I took was calculated but man am I bad at math",
     "Minim de efort maxim de eficiență",
     "Haide mai bine, să nu",
     "Ani trec robotica rămâne",
-    "No I don't think I will"
+    "No I don't think I will",
+    "One does not simply walk into Bruk."
 ];
 
 /// Structures
