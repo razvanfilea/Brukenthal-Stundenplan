@@ -10,14 +10,13 @@ object Versions {
 
     object Sdk {
         const val min = 21
-        const val compile = 31
+        const val compile = 32
         const val target = 31
     }
 
     const val kotlin = "1.6.10"
-    const val kotlinCoroutines = "1.6.0"
-    const val compose = "1.1.0-rc01"
-    const val composeCompiler = "1.1.0-rc02"
-    const val accompanist = "0.22.0-rc"
-    const val voyager = "1.0.0-beta14"
+    const val kotlinCoroutines = "1.6.1"
+    const val compose = "1.1.1"
+    const val accompanist = "0.23.1"
+    const val voyager = "1.0.0-rc02"
 }
