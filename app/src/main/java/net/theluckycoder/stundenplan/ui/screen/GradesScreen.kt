@@ -10,10 +10,10 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -194,7 +194,7 @@ class GradesScreen : Screen {
             if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 1 else 2
 
         LazyVerticalGrid(
-            cells = GridCells.Fixed(count),
+            columns = GridCells.Fixed(count),
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 32.dp)
         ) {
@@ -325,7 +325,7 @@ class GradesScreen : Screen {
                     )
 
                     LazyVerticalGrid(
-                        cells = GridCells.Fixed(2),
+                        columns = GridCells.Fixed(2),
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         itemsIndexed(gradesList) { index, grade ->
@@ -344,7 +344,7 @@ class GradesScreen : Screen {
                                     singleLine = true,
                                     keyboardOptions = numberKeyboard,
                                     modifier = Modifier
-                                        .fillParentMaxWidth()
+                                        .fillMaxWidth()
                                         .padding(horizontal = 2.dp, vertical = 6.dp),
                                 )
                             }

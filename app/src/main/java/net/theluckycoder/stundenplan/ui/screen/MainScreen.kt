@@ -112,8 +112,9 @@ object MainScreen : Screen {
                     viewModel.hasSeenUpdateDialogState.value = true
                 },
                 onConfirm = {
+                    val versionName = UpdateChecker.getNewVersionUrl()
                     viewModel.hasSeenUpdateDialogState.value = true
-                    ctx.browseUrl(MainActivity.APP_STORE_URL)
+                    ctx.browseUrl(versionName)
                 }
             )
         }

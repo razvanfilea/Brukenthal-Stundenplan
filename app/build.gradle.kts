@@ -54,10 +54,6 @@ android {
         language.enableSplit = false
     }
 
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
-    }
-
     buildFeatures {
         compose = true
     }
@@ -82,13 +78,13 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.0-rc01")
 
     // Compose
-    implementation("androidx.compose.ui:ui:${Versions.compose}")
-    implementation("androidx.compose.foundation:foundation:${Versions.compose}")
-    implementation("androidx.compose.material:material:${Versions.compose}")
-    implementation("androidx.compose.animation:animation-graphics:${Versions.compose}")
-    implementation("androidx.compose.ui:ui-tooling-preview:${Versions.compose}")
+    implementation("androidx.compose.ui:ui:1.2.0-rc03")
+    implementation("androidx.compose.foundation:foundation:1.2.0-rc03")
+    implementation("androidx.compose.material:material:1.2.0-rc03")
+    implementation("androidx.compose.animation:animation-graphics:1.2.0-rc03")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.2.0-rc03")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.0")
-    debugImplementation("androidx.compose.ui:ui-tooling:${Versions.compose}")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.2.0-rc03")
     debugImplementation(kotlin("reflect"))
 
     // Compose Accompanist
@@ -100,7 +96,6 @@ dependencies {
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:30.2.0"))
-    implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-config-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")

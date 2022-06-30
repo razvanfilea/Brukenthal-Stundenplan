@@ -13,7 +13,6 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import net.theluckycoder.stundenplan.BuildConfig
 import net.theluckycoder.stundenplan.ui.screen.MainScreen
-import net.theluckycoder.stundenplan.utils.Analytics
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
 
 class MainActivity : ComponentActivity() {
@@ -42,15 +41,9 @@ class MainActivity : ComponentActivity() {
         }
 
         setContentView(view)
-
-        // For Firebase Analytics
-        if (intent.getBooleanExtra(ARG_OPENED_FROM_NOTIFICATION, false))
-            Analytics.openNotificationEvent()
     }
 
     companion object {
         const val ARG_OPENED_FROM_NOTIFICATION = "opened_from_notification"
-        const val APP_STORE_URL =
-            "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
     }
 }

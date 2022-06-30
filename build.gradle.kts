@@ -3,7 +3,6 @@ buildscript {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven { setUrl("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
     }
 
     dependencies {
@@ -20,7 +19,6 @@ allprojects {
         mavenCentral()
         gradlePluginPortal()
         maven { url = uri("https://jitpack.io") }
-        maven { setUrl("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
     }
 }
 

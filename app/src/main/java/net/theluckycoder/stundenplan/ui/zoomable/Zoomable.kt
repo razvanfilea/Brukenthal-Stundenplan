@@ -76,7 +76,7 @@ fun Zoomable(
                     detectDrag(
                         onDrag = { change, dragAmount ->
                             if (state.zooming && enable) {
-                                change.consumePositionChange()
+                                if (change.positionChange() != Offset.Zero) change.consume()
                                 scope.launch {
                                     state.drag(dragAmount)
                                     state.addPosition(
@@ -141,7 +141,7 @@ private suspend fun PointerInputScope.detectDrag(
             var drag: PointerInputChange?
             do {
                 drag = awaitTouchSlopOrCancellation(down.id, onDrag)
-            } while (drag != null && !drag.positionChangeConsumed())
+            } while (drag != null && !drag.isConsumed)
             if (drag != null) {
                 onDragStart.invoke(drag.position)
                 if (
