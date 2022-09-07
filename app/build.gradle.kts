@@ -72,19 +72,19 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:${Versions.kotlinCoroutines}")
 
     // AndroidX
-    implementation("androidx.activity:activity-ktx:1.5.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0")
+    implementation("androidx.activity:activity-ktx:1.5.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-    implementation("androidx.core:core-splashscreen:1.0.0-rc01")
+    implementation("androidx.core:core-splashscreen:1.0.0")
 
     // Compose
-    implementation("androidx.compose.ui:ui:1.2.0-rc03")
-    implementation("androidx.compose.foundation:foundation:1.2.0-rc03")
-    implementation("androidx.compose.material:material:1.2.0-rc03")
-    implementation("androidx.compose.animation:animation-graphics:1.2.0-rc03")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.2.0-rc03")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.0")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.2.0-rc03")
+    implementation("androidx.compose.ui:ui:1.2.1")
+    implementation("androidx.compose.foundation:foundation:1.2.1")
+    implementation("androidx.compose.material:material:1.2.1")
+    implementation("androidx.compose.animation:animation-graphics:1.2.1")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.2.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.2.1")
     debugImplementation(kotlin("reflect"))
 
     // Compose Accompanist
@@ -95,7 +95,7 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-navigator:${Versions.voyager}")
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:30.2.0"))
+    implementation(platform("com.google.firebase:firebase-bom:30.4.1"))
     implementation("com.google.firebase:firebase-config-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")
