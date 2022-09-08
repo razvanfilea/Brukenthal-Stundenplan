@@ -11,7 +11,7 @@ android {
     compileSdk = Versions.Sdk.compile
 
     defaultConfig {
-        applicationId = "net.theluckycoder.stundenplan"
+        applicationId = "ro.brukenthal.stundenplenapp"
         minSdk = Versions.Sdk.min
         targetSdk = Versions.Sdk.target
         versionCode = Versions.App.versionCode
@@ -59,7 +59,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = Versions.compose
+        kotlinCompilerExtensionVersion = "1.3.1"
     }
 }
 
@@ -104,4 +104,5 @@ dependencies {
 
     // Other
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.github.SmartToolFactory:Compose-Image:+")
 }

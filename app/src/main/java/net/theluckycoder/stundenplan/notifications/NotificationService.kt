@@ -61,7 +61,6 @@ class NotificationService : FirebaseMessagingService() {
     private fun getActivityPendingIntent(): PendingIntent {
         val intent = Intent(this, MainActivity::class.java)
 
-        intent.putExtra(MainActivity.ARG_OPENED_FROM_NOTIFICATION, true)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
         return PendingIntent.getActivity(

@@ -6,7 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:7.2.2")
+        classpath("com.android.tools.build:gradle:7.3.0-rc01")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}")
         classpath("com.google.gms:google-services:4.3.13")
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.1")
@@ -18,7 +18,7 @@ allprojects {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven { url = uri("https://jitpack.io") }
+        maven("https://jitpack.io")
     }
 }
 

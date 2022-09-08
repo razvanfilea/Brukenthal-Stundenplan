@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,16 +16,17 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.smarttoolfactory.image.zoom.EnhancedZoomableImage
+import com.smarttoolfactory.image.zoom.rememberEnhancedZoomState
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.model.NetworkResult
 import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.ui.LocalSnackbarHostState
-import net.theluckycoder.stundenplan.ui.zoomable.Zoomable
-import net.theluckycoder.stundenplan.ui.zoomable.rememberZoomableState
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
 import kotlin.math.roundToInt
 
@@ -128,7 +128,7 @@ private fun HomeContent(
     }
 
     SwipeRefresh(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxSize(),
         state = swipeState,
         onRefresh = { },
         swipeEnabled = false,
@@ -138,19 +138,19 @@ private fun HomeContent(
         val timetableType by viewModel.timetableStateFlow.collectAsState()
         val darkMode by viewModel.darkThemeFlow.collectAsState(true)
 
-        val zoomableState = rememberZoomableState(
-            maxScale = 4.4f
-        )
         var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+        val zoomableState = rememberEnhancedZoomState(
+            imageSize = IntSize(bitmap?.width ?: 0, bitmap?.height ?: 0),
+            maxZoom = 4.5f,
+            moveToBounds = true,
+            fling = false,
+            key1 = timetableType,
+        )
 
-        LaunchedEffect(timetableType) {
-            zoomableState.animateScaleTo(1f)
-        }
-
-        val roundedScale = zoomableState.scale.roundToInt()
+        val roundedScale = zoomableState.zoom.roundToInt()
         LaunchedEffect(renderWidth, timetableType, networkResult, roundedScale, darkMode) {
             try {
-                bitmap = viewModel.renderPdf(renderWidth, roundedScale, darkMode)
+                bitmap = viewModel.renderPdf(renderWidth, roundedScale.coerceAtMost(2), darkMode)
             } catch (_: OutOfMemoryError) {
             } catch (e: Exception) {
                 if (networkResult !is NetworkResult.Loading) {
@@ -161,24 +161,13 @@ private fun HomeContent(
         }
 
         if (bitmap != null) {
-            Zoomable(
-                state = zoomableState,
-                onTap = {
-                    viewModel.showAppBarState.value = !viewModel.showAppBarState.value
-                },
-                doubleTapScale = {
-                    when {
-                        zoomableState.scale > 1f -> 1f
-                        else -> 2.5f
-                    }
-                }
-            ) {
-                Image(
-                    modifier = Modifier.fillMaxSize(),
-                    bitmap = bitmap!!.asImageBitmap(),
-                    contentDescription = null
-                )
-            }
+            EnhancedZoomableImage(
+                modifier = Modifier.fillMaxSize(),
+                imageBitmap = bitmap!!.asImageBitmap(),
+                moveToBounds = true,
+                fling = false,
+                enhancedZoomState =zoomableState
+            )
         }
     }
 }

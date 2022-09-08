@@ -3,7 +3,6 @@ package net.theluckycoder.stundenplan.ui.screen
 import android.content.ActivityNotFoundException
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
@@ -27,16 +26,12 @@ import kotlinx.coroutines.launch
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.extensions.browseUrl
 import net.theluckycoder.stundenplan.ui.LocalSnackbarHostState
-import net.theluckycoder.stundenplan.ui.MainActivity
 import net.theluckycoder.stundenplan.utils.UpdateChecker
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
 
 object MainScreen : Screen {
 
-    @OptIn(
-        ExperimentalMaterialApi::class,
-        ExperimentalAnimationApi::class
-    )
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
         val viewModel = viewModel<HomeViewModel>()
