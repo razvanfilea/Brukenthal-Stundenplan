@@ -38,7 +38,6 @@ const TITLES = [
     "Ein neuer Stundenplan wurde hochgeladen."
 ];
 const MESSAGES = [
-    "Creeper! Aww man!",
     "Some people call this junk. Me? I call it treasure",
     "Geschwindigkeit und Präzision!",
     "The risk I took was calculated but man am I bad at math",
@@ -46,7 +45,10 @@ const MESSAGES = [
     "Haide mai bine, să nu",
     "Ani trec robotica rămâne",
     "No I don't think I will",
-    "One does not simply walk into Bruk."
+    "One does not simply walk into Bruk.",
+    "Sunt la școală, scoate-mă de aici!",
+    "Let's not get political here",
+    "Looks like they couldn't handle the Bruk style"
 ];
 
 /// Structures
@@ -147,13 +149,13 @@ exports.checkForNewTimetable = functions
         // Get the urls
         // TODO: This part has to be changed if the website is changed!!!
         const middleSchoolUrl =
-            doc.querySelector("li.menu-item-1320 a")!.getAttribute("href");
+            doc.querySelector("li.menu-item-1320 a")!.getAttribute("href")!;
         const highSchoolUrl =
-            doc.querySelector("li.menu-item-1470 a")!.getAttribute("href");
+            doc.querySelector("li.menu-item-1470 a")!.getAttribute("href")!;
 
         const newConfigValues = new ConfigValues(
-            SITE_URL + highSchoolUrl,
-            SITE_URL + middleSchoolUrl
+            highSchoolUrl.startsWith(SITE_URL) ? highSchoolUrl : (SITE_URL + highSchoolUrl),
+            middleSchoolUrl.startsWith(SITE_URL) ? middleSchoolUrl : (SITE_URL + middleSchoolUrl),
         );
         return updateRemoteConfig(newConfigValues);
     });

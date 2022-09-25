@@ -1,7 +1,7 @@
 {
   "name": "functions",
   "scripts": {
-    "lint": "eslint 'src/**/*'",
+    "lint": "eslint \"src/**/*\"",
     "build": "tsc",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
@@ -18,7 +18,7 @@
     "firebase-admin": "11.0.1",
     "firebase-functions": "3.23.0",
     "jsdom": "20.0.0",
-    "node-fetch": "3.2.10",
+    "node-fetch": "2.6.1",
     "optionator": "0.9.1"
   },
   "devDependencies": {

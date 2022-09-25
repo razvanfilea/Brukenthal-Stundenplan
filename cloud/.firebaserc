@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "brukenthal-stundenplan"
-  }
+    "default": "brukenthal-stundenplan",
+    "bruk": "brukenthal-stundenplan-app"
+  },
+  "targets": {},
+  "etags": {}
 }
