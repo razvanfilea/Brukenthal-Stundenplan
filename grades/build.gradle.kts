@@ -1,7 +1,7 @@
 plugins {
     id("com.android.library")
     kotlin("android")
-    id("com.google.devtools.ksp") version "1.7.10-1.0.6"
+    id("com.google.devtools.ksp") version "1.8.10-1.0.9"
 }
 
 android {
@@ -24,6 +24,6 @@ android {
 dependencies {
     kotlin("stdlib-jdk8")
 
-    implementation("androidx.room:room-ktx:2.4.3")
-    ksp("androidx.room:room-compiler:2.4.3")
+    implementation("androidx.room:room-ktx:2.5.1")
+    ksp("androidx.room:room-compiler:2.5.1")
 }
