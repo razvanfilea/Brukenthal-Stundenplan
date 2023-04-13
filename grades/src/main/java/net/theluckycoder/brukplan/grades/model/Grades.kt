@@ -2,7 +2,7 @@ package net.theluckycoder.brukplan.grades.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Ignore
-import net.theluckycoder.brukplan.grades.roundDecimals
+import net.theluckycoder.brukplan.grades.round2Decimals
 import kotlin.math.roundToInt
 
 data class Grades(
@@ -16,20 +16,18 @@ data class Grades(
     val average: Int
 
     init {
-        var avg = 0f
-        grades.forEach {
-            avg += it
-        }
-        avg = (avg / grades.count { it != 0 }).roundDecimals()
+        var avg = grades.sum().toFloat()
+        avg = (avg / grades.count { it != 0 }).round2Decimals()
 
         if (semesterPaper != 0) {
             avg = if (avg != 0f)
-                ((avg * 3 + semesterPaper) / 4).roundDecimals()
+                ((avg * 3 + semesterPaper) / 4).round2Decimals()
             else semesterPaper.toFloat()
         }
 
-        if (avg.isNaN())
-            avg = 0f
-        average = avg.roundToInt()
+        average = if (avg.isNaN())
+            0
+        else
+            avg.roundToInt()
     }
 }

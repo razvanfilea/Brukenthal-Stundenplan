@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import net.theluckycoder.brukplan.grades.model.Subject
-import net.theluckycoder.brukplan.grades.roundDecimals
+import net.theluckycoder.brukplan.grades.round2Decimals
 import net.theluckycoder.stundenplan.repository.SubjectsRepository
 
 class SubjectsViewModel(app: Application) : AndroidViewModel(app) {
@@ -38,7 +38,7 @@ class SubjectsViewModel(app: Application) : AndroidViewModel(app) {
                         .filter { it != 0 }
                         .average()
                         .toFloat()
-                        .roundDecimals()
+                        .round2Decimals()
 
                 _semesterAveragesStateFlow.value =
                     semesterAverage(Subject.Semester.ONE) to semesterAverage(Subject.Semester.TWO)

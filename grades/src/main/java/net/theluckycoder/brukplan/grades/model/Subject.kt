@@ -1,8 +1,6 @@
 package net.theluckycoder.brukplan.grades.model
 
 import androidx.room.*
-import net.theluckycoder.brukplan.grades.roundDecimals
-import kotlin.math.roundToInt
 
 @Entity(tableName = "subject")
 data class Subject(

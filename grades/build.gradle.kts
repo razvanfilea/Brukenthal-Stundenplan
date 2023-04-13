@@ -25,6 +25,12 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+    arg("room.incremental", true.toString())
+    arg("room.expandProjection", true.toString())
+}
+
 dependencies {
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
