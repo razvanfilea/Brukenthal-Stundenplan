@@ -8,10 +8,11 @@ plugins {
 }
 
 android {
+    namespace = "net.theluckycoder.stundenplan"
     compileSdk = Versions.Sdk.compile
 
     defaultConfig {
-        applicationId = "ro.brukenthal.stundenplenapp"
+        applicationId = "ro.brukenthal.stundenplanapp"
         minSdk = Versions.Sdk.min
         targetSdk = Versions.Sdk.target
         versionCode = Versions.App.versionCode
@@ -50,16 +51,20 @@ android {
         }
     }
 
-    bundle {
-        language.enableSplit = false
-    }
-
-    buildFeatures {
-        compose = true
+    compileOptions {
+        sourceCompatibility = Versions.javaVersion
+        targetCompatibility = Versions.javaVersion
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.4"
+        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
+    }
+
+    bundle.language.enableSplit = false
+
+    buildFeatures {
+        compose = true
+        buildConfig = true
     }
 }
 
@@ -67,40 +72,33 @@ dependencies {
     implementation(project(":grades"))
 
     // Kotlin
-    kotlin("stdlib-jdk8")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.kotlinCoroutines}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:${Versions.kotlinCoroutines}")
+    implementation(libs.kotlin.coroutines.android)
+    implementation(libs.kotlin.coroutines.playServices)
 
     // AndroidX
-    implementation("androidx.activity:activity-ktx:1.7.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
-    implementation("androidx.core:core-splashscreen:1.0.0")
+    implementation(libs.androidX.activity)
+    implementation(libs.androidX.dataStore)
+    implementation(libs.androidX.splash)
+    implementation(libs.androidX.browser)
 
     // Compose
-    implementation("androidx.compose.ui:ui:1.4.0")
-    implementation("androidx.compose.foundation:foundation:1.4.0")
-    implementation("androidx.compose.material:material:1.4.0")
-    implementation("androidx.compose.animation:animation-graphics:1.4.0")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.4.0")
+    implementation(libs.compose.ui)
+    implementation(libs.compose.foundation)
+    implementation(libs.compose.material)
+    implementation(libs.compose.animationGraphics)
+    implementation(libs.compose.toolingPreview)
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.4.0")
-    debugImplementation(kotlin("reflect"))
-
-    // Compose Accompanist
-    implementation("com.google.accompanist:accompanist-swiperefresh:${Versions.accompanist}")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}")
+    debugImplementation(libs.compose.tooling)
+    debugImplementation(libs.kotlin.reflect)
 
     // Voyager
-    implementation("cafe.adriel.voyager:voyager-navigator:${Versions.voyager}")
+    implementation(libs.voyager.navigator)
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:30.5.0"))
+    implementation(platform("com.google.firebase:firebase-bom:31.4.0"))
     implementation("com.google.firebase:firebase-config-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")
-
-    implementation("androidx.browser:browser:1.5.0")
 
     // Other
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

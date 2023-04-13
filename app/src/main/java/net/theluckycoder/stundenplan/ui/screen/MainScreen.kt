@@ -41,6 +41,7 @@ object MainScreen : Screen {
             val scaffoldState = rememberBackdropScaffoldState(BackdropValue.Concealed)
 
             BackdropScaffold(
+                modifier = Modifier.safeDrawingPadding(),
                 scaffoldState = scaffoldState,
                 appBar = { TopBar(viewModel, scaffoldState) },
                 backLayerContent = {
@@ -199,7 +200,7 @@ object MainScreen : Screen {
                     )
                 }
             },
-            elevation = 0.dp
+            elevation = 0.dp,
         )
     }
 

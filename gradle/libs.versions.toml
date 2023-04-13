@@ -1,0 +1,46 @@
+[versions]
+agp = "8.0.0-rc01"
+kotlin = "1.8.20"
+kotlin_coroutines = "1.6.4"
+compose_other = "1.4.1"
+compose_activity = "1.7.0"
+compose_compiler = "1.4.5"
+compose_material3 = "1.1.0-beta02"
+voyager = "1.0.0-rc04"
+
+androidx_room = "2.5.1"
+androidx_activity = "1.7.0"
+androidx_datastore = "1.0.0"
+androidx_splash = "1.0.0"
+androidx_browser = "1.5.0"
+
+[libraries]
+agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+
+kotlin_coroutines_android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlin_coroutines" }
+kotlin_coroutines_playServices = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlin_coroutines" }
+kotlin_reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+
+androidX_activity = { module = "androidx.activity:activity-ktx", version.ref = "androidx_activity" }
+androidX_dataStore = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx_datastore" }
+androidX_splash = { module = "androidx.core:core-splashscreen", version.ref = "androidx_splash" }
+androidX_browser = { module = "androidx.browser:browser0", version.ref = "androidx_browser" }
+
+compose_compiler = { module = "androidx.compose.compiler:compiler", version.ref = "compose_compiler" }
+compose_foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_other" }
+compose_ui = { module = "androidx.compose.ui:ui", version.ref = "compose_other" }
+compose_material = { module = "androidx.compose.material:material", version.ref = "compose_other" }
+compose_material3 = { module = "androidx.compose.material3:material3", version.ref = "compose_material3" }
+compose_animation = { module = "androidx.compose.animation:animation", version.ref = "compose_other" }
+compose_animationGraphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_other" }
+compose_tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_other" }
+compose_toolingPreview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose_other" }
+compose_activity = { module = "androidx.activity:activity-compose", version.ref = "compose_activity" }
+
+voyager_navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
+voyager_transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
+voyager_androidx = { module = "cafe.adriel.voyager:voyager-androidx", version.ref = "voyager" }
+
+room_runtime = { module = "androidx.room:room-ktx", version.ref = "androidx_room" }
+room_compiler = { module = "androidx.room:room-compiler", version.ref = "androidx_room" }

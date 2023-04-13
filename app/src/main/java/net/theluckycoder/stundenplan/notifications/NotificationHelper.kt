@@ -1,12 +1,15 @@
 package net.theluckycoder.stundenplan.notifications
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.pm.PackageManager
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import net.theluckycoder.stundenplan.R
@@ -73,7 +76,13 @@ object NotificationHelper {
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(context)
-            .notify(notificationId, notification)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            NotificationManagerCompat.from(context)
+                .notify(notificationId, notification)
+        }
     }
 }

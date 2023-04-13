@@ -4,10 +4,15 @@ import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,10 +22,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.smarttoolfactory.image.zoom.EnhancedZoomableImage
 import com.smarttoolfactory.image.zoom.rememberEnhancedZoomState
 import net.theluckycoder.stundenplan.R
@@ -51,8 +55,10 @@ class HomeScreen : Screen {
                     }
                 )
             }
-        }) {
-            HomeContent(viewModel)
+        }) { padding ->
+            Box(Modifier.padding(padding)) {
+                HomeContent(viewModel)
+            }
         }
     }
 
@@ -95,6 +101,7 @@ class HomeScreen : Screen {
 }
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun HomeContent(
     viewModel: HomeViewModel,
@@ -105,15 +112,15 @@ private fun HomeContent(
     val renderWidth = minOf(screenWidth, screenHeight)
 
     val networkResult by viewModel.networkStateFlow.collectAsState()
-    val swipeState =
-        rememberSwipeRefreshState(isRefreshing = networkResult is NetworkResult.Loading)
+    val isRefreshing = networkResult is NetworkResult.Loading
+    val refreshState = rememberPullRefreshState(isRefreshing, onRefresh = {})
 
     val actionRetry = stringResource(id = R.string.action_retry)
     val missingNetworkError = stringResource(id = R.string.error_network_connection)
     val downloadFailed = stringResource(id = R.string.error_download_failed)
 
     LaunchedEffect(networkResult) {
-        @Suppress("UnnecessaryVariable") val result = networkResult
+        val result = networkResult
         if (result is NetworkResult.Fail) {
             val message = when (result.reason) {
                 NetworkResult.Fail.Reason.MissingNetworkConnection -> missingNetworkError
@@ -127,12 +134,20 @@ private fun HomeContent(
         }
     }
 
-    SwipeRefresh(
-        modifier = Modifier.fillMaxSize(),
-        state = swipeState,
-        onRefresh = { },
-        swipeEnabled = false,
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pullRefresh(refreshState),
     ) {
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = refreshState,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 16.dp),
+            contentColor = MaterialTheme.colors.secondary
+        )
+
         val renderingError = stringResource(id = R.string.error_rendering_failed)
 
         val timetableType by viewModel.timetableStateFlow.collectAsState()

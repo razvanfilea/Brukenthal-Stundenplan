@@ -8,17 +8,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.runtime.*
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import cafe.adriel.voyager.navigator.Navigator
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.ui.screen.MainScreen
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
@@ -41,18 +42,13 @@ class MainActivity : ComponentActivity() {
 
         installSplashScreen()
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         val view = ComposeView(this)
         view.setContent {
             val isDark by homeViewModel.darkThemeFlow.collectAsState(true)
 
             AppTheme(isDark = isDark) {
-                val systemUiController = rememberSystemUiController()
-
-                val primaryVariantColor = MaterialTheme.colors.primaryVariant
-                LaunchedEffect(primaryVariantColor, isDark) {
-                    systemUiController.setStatusBarColor(primaryVariantColor, darkIcons = isDark)
-                    systemUiController.setNavigationBarColor(Color.Black, isDark)
-                }
 
                 Navigator(MainScreen)
 

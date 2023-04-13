@@ -22,7 +22,7 @@ class AppPreferences(private val context: Application) {
             preferences[DARK_THEME] = useDarkTheme
         }
 
-    val timetableTypeFlow: Flow<TimetableType> = context.appDataStore.data
+    private val timetableTypeFlow: Flow<TimetableType> = context.appDataStore.data
         .map { preferences ->
             if (preferences[TIMETABLE_TYPE] == false)
                 TimetableType.MIDDLE_SCHOOL

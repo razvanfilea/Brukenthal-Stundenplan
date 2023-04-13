@@ -179,7 +179,7 @@ class GradesScreen : Screen {
         }
     }
 
-    @OptIn(ExperimentalFoundationApi::class,)
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun SubjectsList(
         subjects: List<Subject>,
@@ -258,7 +258,6 @@ class GradesScreen : Screen {
         }
     }
 
-    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun EditSubjectDialog(
         subject: Subject,

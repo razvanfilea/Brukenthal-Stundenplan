@@ -7,7 +7,6 @@ import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import net.theluckycoder.stundenplan.utils.UpdateChecker
 
-@Suppress("unused")
 class App : Application() {
 
     override fun onCreate() {
