@@ -22,6 +22,13 @@ data class Subject(
         Grades(emptyList())
     )
 
+    constructor(name: String) : this(
+        0,
+        name,
+        Grades(emptyList()),
+        Grades(emptyList())
+    )
+
     operator fun get(semester: Semester) = if (semester == Semester.ONE) semester1 else semester2
 
     enum class Semester {

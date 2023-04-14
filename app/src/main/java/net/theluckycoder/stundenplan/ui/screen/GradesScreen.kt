@@ -20,7 +20,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -53,8 +52,10 @@ class GradesScreen : Screen {
         Scaffold(
             floatingActionButton = {
                 FloatingActionButton(onClick = {
-                    viewModel.showEditSubjectDialog.value = Subject()
-                }) { Icon(Icons.Default.Add, contentDescription = null) }
+                    viewModel.showCreateSubjectDialog.value = true
+                }) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                }
             },
             floatingActionButtonPosition = FabPosition.Center,
             isFloatingActionButtonDocked = true,
@@ -87,6 +88,13 @@ class GradesScreen : Screen {
                     }
                 }
             }
+        }
+
+        if (viewModel.showCreateSubjectDialog.value) {
+            CreateSubjectDialog(
+                onDismiss = { viewModel.showCreateSubjectDialog.value = false },
+                onSave = { viewModel.insert(it) }
+            )
         }
 
         val subjectToEdit = viewModel.showEditSubjectDialog.value
@@ -195,20 +203,18 @@ class GradesScreen : Screen {
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 32.dp)
         ) {
-            items(subjects) {
-                key(it) {
-                    Card(
-                        Modifier.padding(8.dp),
-                        elevation = 4.dp,
+            items(subjects, key = { it.id }) {
+                Card(
+                    Modifier.padding(8.dp),
+                    elevation = 4.dp,
+                ) {
+                    Box(
+                        Modifier.combinedClickable(
+                            onClick = { onClickSubject(it) },
+                            onLongClick = { onLongClickSubject(it) },
+                        )
                     ) {
-                        Box(
-                            Modifier.combinedClickable(
-                                onClick = { onClickSubject(it) },
-                                onLongClick = { onLongClickSubject(it) },
-                            )
-                        ) {
-                            SubjectItem(it, semester)
-                        }
+                        SubjectItem(it, semester)
                     }
                 }
             }
@@ -251,11 +257,46 @@ class GradesScreen : Screen {
                 Text(stringResource(R.string.grades_list, gradesString))
 
                 Spacer(Modifier.width(4.dp))
-
-                if (grades.semesterPaper != 0)
-                    Text(stringResource(R.string.grades_semester_paper, grades.semesterPaper))
             }
         }
+    }
+
+    @Composable
+    private fun CreateSubjectDialog(onDismiss: () -> Unit, onSave: (Subject) -> Unit) {
+        var name by remember { mutableStateOf("") }
+
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(stringResource(R.string.grades_create_subject)) },
+            text = {
+                TextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(stringResource(R.string.grades_hint_subject)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        capitalization = KeyboardCapitalization.Words,
+                        imeAction = ImeAction.Next
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp)
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    onSave(Subject(name))
+                    onDismiss()
+                }) {
+                    Text(stringResource(R.string.action_save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            }
+        )
     }
 
     @Composable
@@ -265,9 +306,7 @@ class GradesScreen : Screen {
         onDismiss: () -> Unit,
         onSave: (Subject) -> Unit
     ) {
-        var name by remember { mutableStateOf(subject.name) }
         val currentGrades = subject[selectedSemester]
-        var semesterPaper by remember { mutableStateOf(currentGrades.semesterPaper) }
         val gradesList = remember { currentGrades.grades.toMutableStateList() }
 
         if (gradesList.size < 10) {
@@ -291,33 +330,12 @@ class GradesScreen : Screen {
             Surface(Modifier.padding(8.dp), shape = RoundedCornerShape(6.dp)) {
                 Column(Modifier.padding(8.dp)) {
 
-                    val modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 6.dp)
-
                     Spacer(Modifier.height(8.dp))
 
-                    TextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text(stringResource(R.string.grades_hint_subject)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            capitalization = KeyboardCapitalization.Words,
-                            imeAction = ImeAction.Next
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp)///.padding(top = 16.dp),
-                    )
-
-                    TextField(
-                        value = if (semesterPaper != 0) semesterPaper.toString() else "",
-                        onValueChange = { semesterPaper = it.toGrade() },
-                        label = { Text(stringResource(R.string.grades_hint_semester_paper)) },
-                        singleLine = true,
-                        keyboardOptions = numberKeyboard,
-                        modifier = modifier,
+                    Text(
+                        subject.name,
+                        style = MaterialTheme.typography.h5,
+                        modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
                     )
 
                     LazyVerticalGrid(
@@ -336,7 +354,14 @@ class GradesScreen : Screen {
                                 TextField(
                                     value = if (grade != 0) grade.toString() else "",
                                     onValueChange = { gradesList[index] = it.toGrade() },
-                                    label = { Text(stringResource(R.string.grades_hint_grade,index + 1)) },
+                                    label = {
+                                        Text(
+                                            stringResource(
+                                                R.string.grades_hint_grade,
+                                                index + 1
+                                            )
+                                        )
+                                    },
                                     singleLine = true,
                                     keyboardOptions = numberKeyboard,
                                     modifier = Modifier
@@ -358,14 +383,10 @@ class GradesScreen : Screen {
                         }
 
                         TextButton(onClick = {
-                            val selectedGrades = Grades(
-                                semesterPaper = semesterPaper,
-                                grades = gradesList.filterNot { it == 0 },
-                            )
+                            val selectedGrades = Grades(gradesList.filterNot { it == 0 })
 
                             onSave(
                                 subject.copy(
-                                    name = name,
                                     semester1 = if (selectedSemester == Subject.Semester.ONE) selectedGrades else subject.semester1,
                                     semester2 = if (selectedSemester == Subject.Semester.TWO) selectedGrades else subject.semester2,
                                 )

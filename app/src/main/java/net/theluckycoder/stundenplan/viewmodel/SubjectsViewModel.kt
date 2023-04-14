@@ -25,6 +25,7 @@ class SubjectsViewModel(app: Application) : AndroidViewModel(app) {
     private val _semesterAveragesStateFlow = MutableStateFlow(0f to 0f)
     val semesterAveragesStateFlow = _semesterAveragesStateFlow.asStateFlow()
 
+    val showCreateSubjectDialog = mutableStateOf(false)
     val showEditSubjectDialog = mutableStateOf<Subject?>(null)
     val showDeleteSubjectDialog = mutableStateOf<Subject?>(null)
 
