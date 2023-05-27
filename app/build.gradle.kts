@@ -95,7 +95,7 @@ dependencies {
     implementation(libs.voyager.navigator)
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:31.4.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.1.0"))
     implementation("com.google.firebase:firebase-config-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")
