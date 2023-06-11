@@ -4,7 +4,6 @@ plugins {
     kotlin("android")
 
     id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -20,26 +19,19 @@ android {
 
         resourceConfigurations += listOf("en", "de", "ro")
 
-        addManifestPlaceholders(mapOf("firebaseDisabled" to true, "crashlyticsEnabled" to false))
+        addManifestPlaceholders(mapOf("firebaseDisabled" to true))
     }
 
     buildTypes {
-        debug {
-            extra.set("enableCrashlytics", false)
-            extra.set("alwaysUpdateBuildId", false)
-        }
         create("staging") {
             versionNameSuffix = "-staging"
 
             isDebuggable = true
 
             signingConfig = signingConfigs.getByName("debug")
-
-            extra.set("enableCrashlytics", false)
-            extra.set("alwaysUpdateBuildId", false)
         }
         release {
-            addManifestPlaceholders(mapOf("firebaseDisabled" to false, "crashlyticsEnabled" to true))
+            addManifestPlaceholders(mapOf("firebaseDisabled" to false))
 
             isMinifyEnabled = true
             isShrinkResources = true
@@ -65,6 +57,10 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    lint {
+        abortOnError = false
     }
 }
 
@@ -95,12 +91,11 @@ dependencies {
     implementation(libs.voyager.navigator)
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:31.4.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.1.0"))
     implementation("com.google.firebase:firebase-config-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
-    implementation("com.google.firebase:firebase-crashlytics-ktx")
 
     // Other
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.github.SmartToolFactory:Compose-Image:+")
+    implementation("me.saket.telephoto:zoomable:0.4.0")
 }

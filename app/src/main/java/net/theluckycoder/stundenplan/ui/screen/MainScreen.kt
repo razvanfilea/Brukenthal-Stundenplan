@@ -29,9 +29,12 @@ import net.theluckycoder.stundenplan.ui.LocalSnackbarHostState
 import net.theluckycoder.stundenplan.utils.UpdateChecker
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
 
+@OptIn(
+    ExperimentalMaterialApi::class,
+    ExperimentalAnimationGraphicsApi::class
+)
 object MainScreen : Screen {
 
-    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
         val viewModel = viewModel<HomeViewModel>()
@@ -79,6 +82,13 @@ object MainScreen : Screen {
                         ) {
                             replaceScreen(GradesScreen())
                         }
+
+                        BackdropButton(
+                            icon = painterResource(R.drawable.ic_about),
+                            text = stringResource(R.string.menu_about)
+                        ) {
+                            replaceScreen(AboutScreen())
+                        }
                     }
                 },
                 frontLayerContent = {
@@ -86,6 +96,7 @@ object MainScreen : Screen {
                         CurrentScreen()
                     }
                 },
+                gesturesEnabled = !(navigator.lastItem is HomeScreen && scaffoldState.isRevealed)
             )
 
             val scaffoldTutorial by viewModel.hasFinishedScaffoldTutorialFlow.collectAsState(true)
@@ -146,10 +157,6 @@ object MainScreen : Screen {
         }
     }
 
-    @OptIn(
-        ExperimentalMaterialApi::class,
-        ExperimentalAnimationGraphicsApi::class
-    )
     @Composable
     private fun TopBar(
         viewModel: HomeViewModel,
@@ -160,8 +167,7 @@ object MainScreen : Screen {
         TopAppBar(
             backgroundColor = MaterialTheme.colors.primary,
             navigationIcon = {
-                val vector =
-                    AnimatedImageVector.animatedVectorResource(R.drawable.ic_menu_close_anim)
+                val vector = AnimatedImageVector.animatedVectorResource(R.drawable.ic_menu_close_anim)
 
                 IconButton(onClick = {
                     scope.launch {
@@ -211,31 +217,29 @@ object MainScreen : Screen {
 fun UpdateDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(id = R.string.update_available)) },
-        text = { Text(text = stringResource(id = R.string.update_available_desc)) },
-        buttons = {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+) = AlertDialog(
+    onDismissRequest = onDismiss,
+    title = { Text(text = stringResource(id = R.string.update_available)) },
+    text = { Text(text = stringResource(id = R.string.update_available_desc)) },
+    buttons = {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            TextButton(
+                modifier = Modifier.weight(1f),
+                onClick = onDismiss,
             ) {
-                TextButton(
-                    modifier = Modifier.weight(1f),
-                    onClick = onDismiss,
-                ) {
-                    Text(text = stringResource(id = R.string.action_ignore))
-                }
+                Text(text = stringResource(id = R.string.action_ignore))
+            }
 
-                Button(
-                    modifier = Modifier.weight(1f),
-                    onClick = onConfirm,
-                ) {
-                    Text(text = stringResource(id = R.string.action_update))
-                }
+            Button(
+                modifier = Modifier.weight(1f),
+                onClick = onConfirm,
+            ) {
+                Text(text = stringResource(id = R.string.action_update))
             }
         }
-    )
-}
+    }
+)

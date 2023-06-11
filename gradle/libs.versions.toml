@@ -1,17 +1,17 @@
 [versions]
-agp = "8.0.0"
-kotlin = "1.8.20"
-kotlin_coroutines = "1.6.4"
-compose_other = "1.4.1"
+agp = "8.0.2"
+kotlin = "1.8.21"
+kotlin_coroutines = "1.7.1"
+compose_base = "1.4.3"
 compose_activity = "1.7.0"
-compose_compiler = "1.4.5"
+compose_compiler = "1.4.7"
 compose_material3 = "1.1.0-beta02"
-voyager = "1.0.0-rc04"
+voyager = "1.0.0-rc06"
 
 androidx_room = "2.5.1"
-androidx_activity = "1.7.0"
+androidx_activity = "1.7.2"
 androidx_datastore = "1.0.0"
-androidx_splash = "1.0.0"
+androidx_splash = "1.0.1"
 androidx_browser = "1.5.0"
 
 [libraries]
@@ -28,14 +28,14 @@ androidX_splash = { module = "androidx.core:core-splashscreen", version.ref = "a
 androidX_browser = { module = "androidx.browser:browser", version.ref = "androidx_browser" }
 
 compose_compiler = { module = "androidx.compose.compiler:compiler", version.ref = "compose_compiler" }
-compose_foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_other" }
-compose_ui = { module = "androidx.compose.ui:ui", version.ref = "compose_other" }
-compose_material = { module = "androidx.compose.material:material", version.ref = "compose_other" }
+compose_foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_base" }
+compose_ui = { module = "androidx.compose.ui:ui", version.ref = "compose_base" }
+compose_material = { module = "androidx.compose.material:material", version.ref = "compose_base" }
 compose_material3 = { module = "androidx.compose.material3:material3", version.ref = "compose_material3" }
-compose_animation = { module = "androidx.compose.animation:animation", version.ref = "compose_other" }
-compose_animationGraphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_other" }
-compose_tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_other" }
-compose_toolingPreview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose_other" }
+compose_animation = { module = "androidx.compose.animation:animation", version.ref = "compose_base" }
+compose_animationGraphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_base" }
+compose_tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_base" }
+compose_toolingPreview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose_base" }
 compose_activity = { module = "androidx.activity:activity-compose", version.ref = "compose_activity" }
 
 voyager_navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }

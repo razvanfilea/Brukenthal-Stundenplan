@@ -47,4 +47,10 @@
     <string name="notification_permission_required">Benachrichtigungserlaubnis ist erforderlich</string>
     <string name="notification_permission_desc">Um Benachrichtigungen zu erhalten, wenn sich der Stundenplan ändert, müssen Sie der App Benachrichtigungserlaubnis erteilen</string>
     <string name="grades_create_subject">Neues Fach:</string>
+    <string name="about_version">Version</string>
+    <string name="about_privacy_policy">Datenschutz-Bestimmungen</string>
+    <string name="about_app_feedback">App-Feedback</string>
+    <string name="about_developer">Der App-Entwickler</string>
+    <string name="about_contact">Kontakt</string>
+    <string name="menu_about">Über App</string>
 </resources>

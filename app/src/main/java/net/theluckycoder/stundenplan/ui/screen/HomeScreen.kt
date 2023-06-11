@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,17 +17,19 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
-import com.smarttoolfactory.image.zoom.EnhancedZoomableImage
-import com.smarttoolfactory.image.zoom.rememberEnhancedZoomState
+import me.saket.telephoto.zoomable.ZoomSpec
+import me.saket.telephoto.zoomable.ZoomableContentLocation
+import me.saket.telephoto.zoomable.rememberZoomableState
+import me.saket.telephoto.zoomable.zoomable
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.model.NetworkResult
 import net.theluckycoder.stundenplan.model.TimetableType
@@ -107,9 +110,7 @@ private fun HomeContent(
     viewModel: HomeViewModel,
 ) = BoxWithConstraints(Modifier.fillMaxSize()) {
     val snackbarHostState = LocalSnackbarHostState.current
-    val screenWidth = with(LocalDensity.current) { maxWidth.roundToPx() }
-    val screenHeight = with(LocalDensity.current) { maxHeight.roundToPx() }
-    val renderWidth = minOf(screenWidth, screenHeight)
+    val renderWidth = with(LocalDensity.current) { minOf(maxWidth, maxHeight).roundToPx() }
 
     val networkResult by viewModel.networkStateFlow.collectAsState()
     val isRefreshing = networkResult is NetworkResult.Loading
@@ -154,18 +155,12 @@ private fun HomeContent(
         val darkMode by viewModel.darkThemeFlow.collectAsState(true)
 
         var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-        val zoomableState = rememberEnhancedZoomState(
-            imageSize = IntSize(bitmap?.width ?: 0, bitmap?.height ?: 0),
-            maxZoom = 4.5f,
-            moveToBounds = true,
-            fling = false,
-            key1 = timetableType,
-        )
+        val zoomableState = rememberZoomableState(ZoomSpec(maxZoomFactor = MAX_ZOOM_FACTOR))
 
-        val roundedScale = zoomableState.zoom.roundToInt()
+        val roundedScale = (1f + (zoomableState.zoomFraction ?: 0f) * MAX_ZOOM_FACTOR).roundToInt()
         LaunchedEffect(renderWidth, timetableType, networkResult, roundedScale, darkMode) {
             try {
-                bitmap = viewModel.renderPdf(renderWidth, roundedScale.coerceAtMost(2), darkMode)
+                bitmap = viewModel.renderPdf(renderWidth, roundedScale.coerceAtMost(3), darkMode)
             } catch (_: OutOfMemoryError) {
             } catch (e: Exception) {
                 if (networkResult !is NetworkResult.Loading) {
@@ -175,14 +170,20 @@ private fun HomeContent(
             }
         }
 
-        if (bitmap != null) {
-            EnhancedZoomableImage(
-                modifier = Modifier.fillMaxSize(),
-                imageBitmap = bitmap!!.asImageBitmap(),
-                moveToBounds = true,
-                fling = false,
-                enhancedZoomState =zoomableState
+        LaunchedEffect(timetableType) {
+            zoomableState.resetZoom()
+        }
+
+        bitmap?.let { image ->
+            Image(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zoomable(zoomableState),
+                bitmap = image.asImageBitmap(),
+                contentDescription = null
             )
         }
     }
 }
+
+private const val MAX_ZOOM_FACTOR = 5f

@@ -45,7 +45,7 @@ class GradesScreen : Screen {
     @Composable
     override fun Content() {
         val viewModel = viewModel<SubjectsViewModel>()
-        val subjects by viewModel.subjectsFlow.collectAsState(emptyList())
+        val subjectsState = viewModel.subjectsFlow.collectAsState(null)
         val selectedSemester by viewModel.selectedSemesterStateFlow.collectAsState()
         val semesterAverage by viewModel.semesterAveragesStateFlow.collectAsState()
 
@@ -63,6 +63,9 @@ class GradesScreen : Screen {
             bottomBar = { BottomBar(selectedSemester, viewModel) }
         ) { contentPadding ->
             Box(Modifier.padding(contentPadding)) {
+                // Don't draw anything while it's loading
+                val subjects = subjectsState.value ?: return@Box
+
                 if (subjects.isEmpty()) {
                     Card(
                         Modifier.padding(8.dp),
@@ -269,19 +272,21 @@ class GradesScreen : Screen {
             onDismissRequest = onDismiss,
             title = { Text(stringResource(R.string.grades_create_subject)) },
             text = {
-                TextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.grades_hint_subject)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        capitalization = KeyboardCapitalization.Words,
-                        imeAction = ImeAction.Next
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp)
-                )
+                Column {
+                    Spacer(Modifier.height(16.dp))
+
+                    TextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text(stringResource(R.string.grades_hint_subject)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            capitalization = KeyboardCapitalization.Words,
+                            imeAction = ImeAction.Next
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             },
             confirmButton = {
                 TextButton(onClick = {

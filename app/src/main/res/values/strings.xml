@@ -36,6 +36,7 @@
     <string name="menu_timetable">Timetable</string>
     <string name="menu_news">News</string>
     <string name="menu_grades">Grades</string>
+    <string name="menu_about">About App</string>
 
     <!-- Grades -->
     <string name="grades_explanation_title">What\'s this?</string>
@@ -53,4 +54,11 @@
     <string name="grades_hint_grade">Grade %d</string>
     <string name="grades_delete_title">Do you want to delete %s?</string>
     <string name="grades_delete_desc">Doing this will remove the subject along with its grades from both semesters.</string>
+
+    <!-- About Screen -->
+    <string name="about_version">Version</string>
+    <string name="about_privacy_policy">Privacy Policy</string>
+    <string name="about_app_feedback">App Feedback</string>
+    <string name="about_developer">Developer</string>
+    <string name="about_contact">Contact</string>
 </resources>

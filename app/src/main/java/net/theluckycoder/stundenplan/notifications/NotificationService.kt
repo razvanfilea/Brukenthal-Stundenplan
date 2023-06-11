@@ -67,20 +67,18 @@ class NotificationService : FirebaseMessagingService() {
             this,
             0,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or IMMUTABLE_INTENT_FLAG
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
 
     private fun getUrlPendingIntent(url: String): PendingIntent {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
 
-        return PendingIntent.getActivity(this, 0, intent, IMMUTABLE_INTENT_FLAG)
+        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
     }
 
     companion object {
         private const val TAG = "FirebaseNotifications"
-        private val IMMUTABLE_INTENT_FLAG =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
 
         const val NOTIFICATION_ID = 1
         const val NOTIFICATION_WITH_URL_ID = 2

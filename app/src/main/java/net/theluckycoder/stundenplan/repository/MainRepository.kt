@@ -58,8 +58,8 @@ class MainRepository(private val context: Context) {
         val file = getNewFile(timetable)
 
         try {
-            downloadApi.download(timetable.url).byteStream().use { input ->
-                file.outputStream().use { output ->
+            downloadApi.download(timetable.url).byteStream().buffered().use { input ->
+                file.outputStream().buffered().use { output ->
                     input.copyTo(output)
                 }
             }

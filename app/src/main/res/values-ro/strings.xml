@@ -47,4 +47,10 @@
     <string name="notification_permission_required">Permisiunea de notificări este necesară</string>
     <string name="notification_permission_desc">Pentru a primi notificări când se modifică orarul, trebuie să acordați permisiuni de notificări aplicației</string>
     <string name="grades_create_subject">Materie nouă:</string>
+    <string name="about_version">Versiune</string>
+    <string name="about_privacy_policy">Politica de confidențialitate</string>
+    <string name="about_app_feedback">Feedback despre aplicație</string>
+    <string name="about_developer">Dezvoltatorul aplicației</string>
+    <string name="about_contact">Contact</string>
+    <string name="menu_about">Despre aplicație</string>
 </resources>

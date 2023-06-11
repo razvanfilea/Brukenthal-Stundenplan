@@ -32,8 +32,6 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val repository = MainRepository(app)
     private val preferences = AppPreferences(app)
 
-    private var lastPdfRenderer: PdfRenderer? = null
-
     private val _timetableStateFlow = MutableStateFlow(TimetableType.HIGH_SCHOOL)
     val timetableStateFlow = _timetableStateFlow.asStateFlow()
 
@@ -48,7 +46,6 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     // region Mutexes
 
-    private val pdfRendererMutex = Mutex()
     private val refreshMutex = Mutex()
 
     // endregion Mutexes
@@ -87,13 +84,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         _timetableStateFlow.value = newTimetableType
         refresh()
 
-        viewModelScope.launch(Dispatchers.Default) {
-            // Remove the old pdfRenderer
-            pdfRendererMutex.withLock {
-                lastPdfRenderer?.close()
-                lastPdfRenderer = null
-            }
-
+        viewModelScope.launch(Dispatchers.IO) {
             preferences.updateTimetableType(newTimetableType)
         }
     }
@@ -109,32 +100,29 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         zoom: Int = 1,
         darkMode: Boolean = false
     ): Bitmap = withContext(Dispatchers.Default) {
+        val timetableType = _timetableStateFlow.value
+        Log.d("Pdf Render", "Started rendering for Timetable: ${timetableType.name}")
 
         val scaledWidth = (width * zoom)
+        val pdfRenderer = getNewPdfRenderer(timetableType)
 
-        val bitmap = pdfRendererMutex.withLock {
-            val pdfRenderer = lastPdfRenderer ?: withContext(Dispatchers.IO) {
-                getNewPdfRenderer(_timetableStateFlow.value)
-            }
+        ensureActive()
 
-            lastPdfRenderer = pdfRenderer
+        val bitmap = pdfRenderer.openPage(0).use { page ->
+            val bitmap = Bitmap.createBitmap(
+                scaledWidth, (scaledWidth.toFloat() / page.width * page.height).toInt(),
+                Bitmap.Config.ARGB_8888
+            )
 
-            ensureActive()
+            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
 
-            pdfRenderer.openPage(0).use { page ->
-                val bitmap = Bitmap.createBitmap(
-                    scaledWidth, (scaledWidth.toFloat() / page.width * page.height).toInt(),
-                    Bitmap.Config.ARGB_8888
-                )
-
-                page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-
-                bitmap
-            }
+            bitmap
         }
 
+        ensureActive()
+
         if (BuildConfig.DEBUG) {
-            Log.d("Pdf Render", "Rendered Bitmap (${bitmap.width}, ${bitmap.height}); Zoom $zoom; DarkMode $darkMode")
+            Log.d("Pdf Render", "Timetable: ${timetableType.name}; Bitmap Size (${bitmap.width}, ${bitmap.height}); Zoom $zoom; DarkMode $darkMode")
         }
 
         if (darkMode) {
