@@ -40,7 +40,7 @@ object MainScreen : Screen {
         val viewModel = viewModel<HomeViewModel>()
         val scope = rememberCoroutineScope()
 
-        Navigator(HomeScreen()) { navigator ->
+        Navigator(TimetableScreen()) { navigator ->
             val scaffoldState = rememberBackdropScaffoldState(BackdropValue.Concealed)
 
             BackdropScaffold(
@@ -58,7 +58,7 @@ object MainScreen : Screen {
                             icon = painterResource(R.drawable.ic_timetable),
                             text = stringResource(R.string.menu_timetable)
                         ) {
-                            replaceScreen(HomeScreen())
+                            replaceScreen(TimetableScreen())
                         }
 
                         val ctx = LocalContext.current
@@ -96,7 +96,7 @@ object MainScreen : Screen {
                         CurrentScreen()
                     }
                 },
-                gesturesEnabled = !(navigator.lastItem is HomeScreen && scaffoldState.isRevealed)
+                gesturesEnabled = !(navigator.lastItem is TimetableScreen)
             )
 
             val scaffoldTutorial by viewModel.hasFinishedScaffoldTutorialFlow.collectAsState(true)

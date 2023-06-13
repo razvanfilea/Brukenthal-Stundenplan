@@ -97,5 +97,5 @@ dependencies {
 
     // Other
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("me.saket.telephoto:zoomable:0.4.0")
+    implementation("com.davemorrissey.labs:subsampling-scale-image-view-androidx:3.10.0")
 }

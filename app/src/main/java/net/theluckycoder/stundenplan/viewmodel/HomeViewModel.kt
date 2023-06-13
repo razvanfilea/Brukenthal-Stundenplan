@@ -1,21 +1,21 @@
 package net.theluckycoder.stundenplan.viewmodel
 
 import android.app.Application
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.pdf.PdfRenderer
-import android.os.ParcelFileDescriptor
-import android.os.ParcelFileDescriptor.MODE_READ_ONLY
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.theluckycoder.stundenplan.BuildConfig
@@ -43,6 +43,13 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     val hasSeenUpdateDialogState = mutableStateOf(false)
     val showAppBarState = mutableStateOf(true)
+
+    val timetableFile = timetableStateFlow
+        .combine(networkStateFlow) { file, _ ->
+            file
+        }.map {
+            repository.getLastFile(it)
+        }
 
     // region Mutexes
 
@@ -93,66 +100,6 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch(Dispatchers.IO) {
             preferences.finishedScaffoldTutorial()
         }
-    }
-
-    suspend fun renderPdf(
-        width: Int,
-        zoom: Int = 1,
-        darkMode: Boolean = false
-    ): Bitmap = withContext(Dispatchers.Default) {
-        val timetableType = _timetableStateFlow.value
-        Log.d("Pdf Render", "Started rendering for Timetable: ${timetableType.name}")
-
-        val scaledWidth = (width * zoom)
-        val pdfRenderer = getNewPdfRenderer(timetableType)
-
-        ensureActive()
-
-        val bitmap = pdfRenderer.openPage(0).use { page ->
-            val bitmap = Bitmap.createBitmap(
-                scaledWidth, (scaledWidth.toFloat() / page.width * page.height).toInt(),
-                Bitmap.Config.ARGB_8888
-            )
-
-            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-
-            bitmap
-        }
-
-        ensureActive()
-
-        if (BuildConfig.DEBUG) {
-            Log.d("Pdf Render", "Timetable: ${timetableType.name}; Bitmap Size (${bitmap.width}, ${bitmap.height}); Zoom $zoom; DarkMode $darkMode")
-        }
-
-        if (darkMode) {
-            val length = bitmap.width * bitmap.height
-            val pixels = IntArray(length)
-            bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-
-            for (i in 0 until length) {
-                val c = pixels[i]
-                // Invert all the colors that aren't transparent
-                if (Color.alpha(c) != 0) {
-                    pixels[i] = Color.argb(
-                        Color.alpha(c),
-                        255 - Color.red(c),
-                        255 - Color.green(c),
-                        255 - Color.blue(c)
-                    )
-                }
-            }
-
-            bitmap.setPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-        }
-
-        bitmap
-    }
-
-    private fun getNewPdfRenderer(type: TimetableType): PdfRenderer {
-        val file = repository.getLastFile(type)
-        val pfd = ParcelFileDescriptor.open(file, MODE_READ_ONLY)
-        return PdfRenderer(pfd)
     }
 
     private suspend fun downloadTimetable() = coroutineScope {

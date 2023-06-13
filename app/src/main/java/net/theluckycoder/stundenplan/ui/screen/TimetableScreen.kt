@@ -1,10 +1,10 @@
 package net.theluckycoder.stundenplan.ui.screen
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,27 +17,27 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
-import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.ZoomableContentLocation
-import me.saket.telephoto.zoomable.rememberZoomableState
-import me.saket.telephoto.zoomable.zoomable
+import com.davemorrissey.labs.subscaleview.ImageSource
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.model.NetworkResult
 import net.theluckycoder.stundenplan.model.TimetableType
 import net.theluckycoder.stundenplan.ui.LocalSnackbarHostState
+import net.theluckycoder.stundenplan.ui.pdf_rendering.PDFDecoder
+import net.theluckycoder.stundenplan.ui.pdf_rendering.PDFRegionDecoder
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
 import kotlin.math.roundToInt
 
-class HomeScreen : Screen {
+
+class TimetableScreen : Screen {
 
     @Composable
     override fun Content() {
@@ -149,38 +149,28 @@ private fun HomeContent(
             contentColor = MaterialTheme.colors.secondary
         )
 
-        val renderingError = stringResource(id = R.string.error_rendering_failed)
-
-        val timetableType by viewModel.timetableStateFlow.collectAsState()
         val darkMode by viewModel.darkThemeFlow.collectAsState(true)
+        val fileState = viewModel.timetableFile.collectAsState(null)
 
-        var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-        val zoomableState = rememberZoomableState(ZoomSpec(maxZoomFactor = MAX_ZOOM_FACTOR))
+        val file = fileState.value
+        if (file != null) {
+            AndroidView(
+                modifier = Modifier.fillMaxSize(),
+                factory = { context ->
+                    SubsamplingScaleImageView(context).apply {
 
-        val roundedScale = (1f + (zoomableState.zoomFraction ?: 0f) * MAX_ZOOM_FACTOR).roundToInt()
-        LaunchedEffect(renderWidth, timetableType, networkResult, roundedScale, darkMode) {
-            try {
-                bitmap = viewModel.renderPdf(renderWidth, roundedScale.coerceAtMost(3), darkMode)
-            } catch (_: OutOfMemoryError) {
-            } catch (e: Exception) {
-                if (networkResult !is NetworkResult.Loading) {
-                    snackbarHostState.showSnackbar(renderingError)
-                    e.printStackTrace()
+                        setMinimumTileDpi(160)
+
+                        setBitmapDecoderFactory { PDFDecoder(0, file, MAX_ZOOM_FACTOR, darkMode) }
+                        setRegionDecoderFactory { PDFRegionDecoder(0, file, MAX_ZOOM_FACTOR, darkMode) }
+                        setImage(ImageSource.uri(file.absolutePath))
+                    }
+                },
+                update = { view ->
+                    view.setBitmapDecoderFactory { PDFDecoder(0, file, MAX_ZOOM_FACTOR, darkMode) }
+                    view.setRegionDecoderFactory { PDFRegionDecoder(0, file, MAX_ZOOM_FACTOR, darkMode) }
+                    view.setImage(ImageSource.uri(file.absolutePath))
                 }
-            }
-        }
-
-        LaunchedEffect(timetableType) {
-            zoomableState.resetZoom()
-        }
-
-        bitmap?.let { image ->
-            Image(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .zoomable(zoomableState),
-                bitmap = image.asImageBitmap(),
-                contentDescription = null
             )
         }
     }
