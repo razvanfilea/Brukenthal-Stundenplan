@@ -83,7 +83,7 @@ dependencies {
     implementation(libs.compose.material)
     implementation(libs.compose.animationGraphics)
     implementation(libs.compose.toolingPreview)
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     debugImplementation(libs.compose.tooling)
     debugImplementation(libs.kotlin.reflect)
 
@@ -91,7 +91,7 @@ dependencies {
     implementation(libs.voyager.navigator)
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:32.1.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.2.3"))
     implementation("com.google.firebase:firebase-config-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
 
