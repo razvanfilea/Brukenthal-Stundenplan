@@ -18,12 +18,9 @@ class SubjectsViewModel(app: Application) : AndroidViewModel(app) {
 
     private val repository = SubjectsRepository(app)
 
-    private val _selectedSemesterStateFlow = MutableStateFlow(Subject.Semester.ONE)
-    val selectedSemesterStateFlow = _selectedSemesterStateFlow.asStateFlow()
-
     val subjectsFlow = repository.subjects
-    private val _semesterAveragesStateFlow = MutableStateFlow(0f to 0f)
-    val semesterAveragesStateFlow = _semesterAveragesStateFlow.asStateFlow()
+    private val _totalAveragesStateFlow = MutableStateFlow(0f)
+    val totalAveragesStateFlow = _totalAveragesStateFlow.asStateFlow()
 
     val showCreateSubjectDialog = mutableStateOf(false)
     val showEditSubjectDialog = mutableStateOf<Subject?>(null)
@@ -34,21 +31,13 @@ class SubjectsViewModel(app: Application) : AndroidViewModel(app) {
             subjectsFlow.collectLatest { subjects ->
                 ensureActive()
 
-                fun semesterAverage(semester: Subject.Semester) =
-                    subjects.map { subject -> subject[semester].average }
-                        .filter { it != 0 }
-                        .average()
-                        .toFloat()
-                        .round2Decimals()
-
-                _semesterAveragesStateFlow.value =
-                    semesterAverage(Subject.Semester.ONE) to semesterAverage(Subject.Semester.TWO)
+                _totalAveragesStateFlow.value = subjects.map { subject -> subject.gradesAverage }
+                    .filter { it != 0 }
+                    .average()
+                    .toFloat()
+                    .round2Decimals()
             }
         }
-    }
-
-    fun setSelectedSemester(semester: Subject.Semester) {
-        _selectedSemesterStateFlow.value = semester
     }
 
     fun insert(subject: Subject) {

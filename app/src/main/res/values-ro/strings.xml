@@ -29,8 +29,7 @@
     <string name="action_save">Salvează</string>
     <string name="grades_subject">Materie</string>
     <string name="grades_semester_ct">Semestrul %d</string>
-    <string name="grades_semester_average">Medie semestrială: %.2f</string>
-    <string name="grades_average">Medie: %d</string>
+    <string name="grades_average">Medie:</string>
     <string name="grades_list">Note: %s</string>
     <string name="grades_semester_paper">Teză: %d</string>
     <string name="grades_delete_title">Vrei să ștergi %s?</string>
@@ -38,7 +37,6 @@
     <string name="menu_news">Noutăți</string>
     <string name="menu_grades">Note</string>
     <string name="grades_delete_desc">Materia împreună cu notele sale vor fi ștearse din ambele semestre.</string>
-    <string name="grades_general_average">Media generală: %.2f</string>
     <string name="grades_explanation">Introduceți notele dvs. aici pentru a păstra o imagine de ansamblu asupra lor și a mediilor dvs.</string>
     <string name="grades_explanation_title">Ce e asta?</string>
     <string name="grades_hint_subject">Numele materiei</string>

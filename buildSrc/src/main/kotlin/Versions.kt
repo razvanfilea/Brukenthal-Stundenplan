@@ -3,7 +3,7 @@ import org.gradle.api.JavaVersion
 object Versions {
     object App {
         private const val major = 2
-        private const val minor = 3
+        private const val minor = 4
 
         const val versionCode: Int = major * 10 + minor
         const val versionName: String = "$major.$minor"

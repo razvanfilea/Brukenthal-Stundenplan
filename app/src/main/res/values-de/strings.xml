@@ -30,7 +30,7 @@
     <string name="grades_subject">Fach</string>
     <string name="grades_semester_ct">Semester %d</string>
     <string name="grades_semester_paper">Semesterarbeit: %d</string>
-    <string name="grades_average">Mittelnote: %d</string>
+    <string name="grades_average">Mittelnote:</string>
     <string name="menu_timetable">Stundenplan</string>
     <string name="menu_news">Informationen</string>
     <string name="grades_list">Noten: %s</string>
@@ -39,8 +39,6 @@
     <string name="grades_delete_desc">"Dieses wird das Fach samt der Noten der beiden Semester löschen. "</string>
     <string name="grades_explanation">Trage deine Noten hier ein, um leichter einen Überblick über deine Noten und Mittelnoten zu behalten.</string>
     <string name="grades_explanation_title">Was ist das?</string>
-    <string name="grades_general_average">Mittelnote: %.2f</string>
-    <string name="grades_semester_average">Semestermittelnote: %.2f</string>
     <string name="grades_hint_subject">Fachname</string>
     <string name="grades_hint_semester_paper">Semesterarbeit</string>
     <string name="grades_hint_grade">Note %d</string>

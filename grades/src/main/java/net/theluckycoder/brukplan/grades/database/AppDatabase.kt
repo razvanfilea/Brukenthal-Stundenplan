@@ -13,7 +13,7 @@ import net.theluckycoder.brukplan.grades.model.Subject
 
 @Database(
     entities = [Subject::class],
-    version = 2,
+    version = 3,
     autoMigrations = [
         AutoMigration(
             from = 1,

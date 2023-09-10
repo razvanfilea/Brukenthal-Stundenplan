@@ -1,27 +1,50 @@
 package net.theluckycoder.stundenplan.ui.screen
 
 import android.content.res.Configuration
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Card
+import androidx.compose.material.FabPosition
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,20 +57,18 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
-import net.theluckycoder.brukplan.grades.model.Grades
 import net.theluckycoder.brukplan.grades.model.Subject
 import net.theluckycoder.stundenplan.R
+import net.theluckycoder.stundenplan.ui.VerticallyAnimatedNumber
 import net.theluckycoder.stundenplan.viewmodel.SubjectsViewModel
 
-@OptIn(ExperimentalAnimationApi::class)
 class GradesScreen : Screen {
 
     @Composable
     override fun Content() {
         val viewModel = viewModel<SubjectsViewModel>()
         val subjectsState = viewModel.subjectsFlow.collectAsState(null)
-        val selectedSemester by viewModel.selectedSemesterStateFlow.collectAsState()
-        val semesterAverage by viewModel.semesterAveragesStateFlow.collectAsState()
+        val totalAverage by viewModel.totalAveragesStateFlow.collectAsState()
 
         Scaffold(
             floatingActionButton = {
@@ -59,8 +80,7 @@ class GradesScreen : Screen {
             },
             floatingActionButtonPosition = FabPosition.Center,
             isFloatingActionButtonDocked = true,
-            topBar = { TopBar(selectedSemester, semesterAverage) },
-            bottomBar = { BottomBar(selectedSemester, viewModel) }
+            topBar = { TopBar(totalAverage) },
         ) { contentPadding ->
             Box(Modifier.padding(contentPadding)) {
                 // Don't draw anything while it's loading
@@ -81,14 +101,11 @@ class GradesScreen : Screen {
                         }
                     }
                 } else {
-                    Crossfade(targetState = selectedSemester) { semester ->
-                        SubjectsList(
-                            subjects = subjects,
-                            semester = semester,
-                            onClickSubject = { viewModel.showEditSubjectDialog.value = it },
-                            onLongClickSubject = { viewModel.showDeleteSubjectDialog.value = it },
-                        )
-                    }
+                    SubjectsList(
+                        subjects = subjects,
+                        onClickSubject = { viewModel.showEditSubjectDialog.value = it },
+                        onLongClickSubject = { viewModel.showDeleteSubjectDialog.value = it },
+                    )
                 }
             }
         }
@@ -104,7 +121,6 @@ class GradesScreen : Screen {
         if (subjectToEdit != null) {
             EditSubjectDialog(
                 subjectToEdit,
-                selectedSemester,
                 onDismiss = { viewModel.showEditSubjectDialog.value = null },
                 onSave = { viewModel.insert(it) }
             )
@@ -124,69 +140,20 @@ class GradesScreen : Screen {
     }
 
     @Composable
-    private fun TopBar(
-        selectedSemester: Subject.Semester,
-        semesterAverage: Pair<Float, Float>
-    ) {
-        Column(
+    private fun TopBar(totalAverage: Float) {
+        Row(
             Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colors.surface)
                 .padding(16.dp),
         ) {
-            AnimatedContent(
-                targetState = if (selectedSemester == Subject.Semester.ONE) semesterAverage.first else semesterAverage.second
-            ) { target ->
-                Text(stringResource(R.string.grades_semester_average, target))
+            Text(stringResource(R.string.grades_average))
+
+            Spacer(Modifier.width(2.dp))
+
+            VerticallyAnimatedNumber(targetState = totalAverage) { target ->
+                Text(target.toString())
             }
-
-            val annualAverage = remember(semesterAverage) {
-                semesterAverage.toList()
-                    .filterNot { it == 0f }.average().takeIf { it.isFinite() } ?: 0f
-            }
-
-            Spacer(Modifier.height(2.dp))
-
-            AnimatedContent(targetState = annualAverage) { target ->
-                Text(stringResource(R.string.grades_general_average, target))
-            }
-        }
-    }
-
-    @Composable
-    private fun BottomBar(
-        selectedSemester: Subject.Semester,
-        viewModel: SubjectsViewModel
-    ) {
-        BottomAppBar(
-            Modifier.fillMaxWidth(),
-            backgroundColor = MaterialTheme.colors.surface,
-        ) {
-            val selected1 = selectedSemester == Subject.Semester.ONE
-            BottomNavigationItem(
-                selected = selected1,
-                onClick = { viewModel.setSelectedSemester(Subject.Semester.ONE) },
-                icon = {
-                    Text(
-                        text = stringResource(R.string.grades_semester_ct, 1),
-                        color = if (selected1) MaterialTheme.colors.secondaryVariant else Color.Unspecified,
-                        fontWeight = FontWeight.Bold.takeIf { selected1 },
-                    )
-                }
-            )
-
-            val selected2 = selectedSemester == Subject.Semester.TWO
-            BottomNavigationItem(
-                selected = selected2,
-                onClick = { viewModel.setSelectedSemester(Subject.Semester.TWO) },
-                icon = {
-                    Text(
-                        text = stringResource(R.string.grades_semester_ct, 2),
-                        color = if (selected2) MaterialTheme.colors.secondaryVariant else Color.Unspecified,
-                        fontWeight = FontWeight.Bold.takeIf { selected2 },
-                    )
-                }
-            )
         }
     }
 
@@ -194,7 +161,6 @@ class GradesScreen : Screen {
     @Composable
     private fun SubjectsList(
         subjects: List<Subject>,
-        semester: Subject.Semester,
         onClickSubject: (Subject) -> Unit,
         onLongClickSubject: (Subject) -> Unit,
     ) {
@@ -217,7 +183,7 @@ class GradesScreen : Screen {
                             onLongClick = { onLongClickSubject(it) },
                         )
                     ) {
-                        SubjectItem(it, semester)
+                        SubjectItem(it)
                     }
                 }
             }
@@ -225,9 +191,8 @@ class GradesScreen : Screen {
     }
 
     @Composable
-    private fun SubjectItem(subject: Subject, semester: Subject.Semester) {
+    private fun SubjectItem(subject: Subject) {
         Column(modifier = Modifier.padding(12.dp)) {
-            val grades = subject[semester]
 
             Row(
                 Modifier.fillMaxWidth(),
@@ -241,9 +206,9 @@ class GradesScreen : Screen {
 
                 Spacer(Modifier.width(8.dp))
 
-                if (grades.average != 0) {
+                if (subject.gradesAverage != 0) {
                     Text(
-                        stringResource(R.string.grades_average, grades.average),
+                        stringResource(R.string.grades_average, subject.gradesAverage),
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -256,7 +221,7 @@ class GradesScreen : Screen {
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                val gradesString = grades.grades.filter { it != 0 }.joinToString(", ")
+                val gradesString = subject.grades.filter { it != 0 }.joinToString(", ")
                 Text(stringResource(R.string.grades_list, gradesString))
 
                 Spacer(Modifier.width(4.dp))
@@ -307,12 +272,10 @@ class GradesScreen : Screen {
     @Composable
     private fun EditSubjectDialog(
         subject: Subject,
-        selectedSemester: Subject.Semester,
         onDismiss: () -> Unit,
         onSave: (Subject) -> Unit
     ) {
-        val currentGrades = subject[selectedSemester]
-        val gradesList = remember { currentGrades.grades.toMutableStateList() }
+        val gradesList = remember { subject.grades.toMutableStateList() }
 
         if (gradesList.size < 10) {
             val zeroCount = gradesList.count { it == 0 }
@@ -388,14 +351,9 @@ class GradesScreen : Screen {
                         }
 
                         TextButton(onClick = {
-                            val selectedGrades = Grades(gradesList.filterNot { it == 0 })
+                            val selectedGrades = gradesList.filterNot { it == 0 }
 
-                            onSave(
-                                subject.copy(
-                                    semester1 = if (selectedSemester == Subject.Semester.ONE) selectedGrades else subject.semester1,
-                                    semester2 = if (selectedSemester == Subject.Semester.TWO) selectedGrades else subject.semester2,
-                                )
-                            )
+                            onSave(subject.copy(grades = selectedGrades))
                             onDismiss()
                         }) {
                             Text(stringResource(R.string.action_save))

@@ -110,7 +110,7 @@ private fun HomeContent(
     viewModel: HomeViewModel,
 ) = BoxWithConstraints(Modifier.fillMaxSize()) {
     val snackbarHostState = LocalSnackbarHostState.current
-    val renderWidth = with(LocalDensity.current) { minOf(maxWidth, maxHeight).roundToPx() }
+//    val renderWidth = with(LocalDensity.current) { minOf(maxWidth, maxHeight).roundToPx() }
 
     val networkResult by viewModel.networkStateFlow.collectAsState()
     val isRefreshing = networkResult is NetworkResult.Loading

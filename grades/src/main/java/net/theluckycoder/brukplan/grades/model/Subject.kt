@@ -1,6 +1,8 @@
 package net.theluckycoder.brukplan.grades.model
 
 import androidx.room.*
+import net.theluckycoder.brukplan.grades.round2Decimals
+import kotlin.math.roundToInt
 
 @Entity(tableName = "subject")
 data class Subject(
@@ -9,30 +11,33 @@ data class Subject(
     val id: Long,
     @ColumnInfo(name = "name")
     val name: String,
-    @Embedded(prefix = "sem1_")
-    val semester1: Grades,
-    @Embedded(prefix = "sem2_")
-    val semester2: Grades,
+    @ColumnInfo(name = "grades")
+    val grades: List<Int>
 ) {
+
+    @Ignore
+    val gradesAverage: Int
+
+    init {
+        val sum = grades.sum().toFloat()
+        val avg = (sum / grades.count { it != 0 }).round2Decimals()
+
+        gradesAverage = if (avg.isNaN())
+            0
+        else
+            avg.roundToInt()
+    }
+
     @Ignore
     constructor() : this(
         0,
         "",
-        Grades(emptyList()),
-        Grades(emptyList())
+        emptyList(),
     )
 
     constructor(name: String) : this(
         0,
         name,
-        Grades(emptyList()),
-        Grades(emptyList())
+        emptyList(),
     )
-
-    operator fun get(semester: Semester) = if (semester == Semester.ONE) semester1 else semester2
-
-    enum class Semester {
-        ONE,
-        TWO
-    }
 }
