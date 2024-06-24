@@ -1,18 +1,21 @@
 [versions]
-agp = "8.2.0-beta03"
-kotlin = "1.9.10"
-kotlin_coroutines = "1.7.3"
-compose_base = "1.5.1"
-compose_activity = "1.7.2"
-compose_compiler = "1.5.3"
-compose_material3 = "1.1.1"
-voyager = "1.0.0-rc07"
+agp = "8.5.0"
+kotlin = "1.9.24"
+kotlin_coroutines = "1.8.1"
+compose_base = "1.6.8"
+compose_activity = "1.9.0"
+compose_compiler = "1.5.14"
+compose_material3 = "1.2.1"
+lifecycleViewmodelCompose = "2.8.2"
+retrofit = "2.11.0"
+subsamplingScaleImageView = "3.10.0"
+voyager = "1.0.0"
 
-androidx_room = "2.5.2"
-androidx_activity = "1.7.2"
-androidx_datastore = "1.0.0"
+androidx_room = "2.6.1"
+androidx_activity = "1.9.0"
+androidx_datastore = "1.1.1"
 androidx_splash = "1.0.1"
-androidx_browser = "1.6.0"
+androidx_browser = "1.8.0"
 
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -37,7 +40,10 @@ compose_animationGraphics = { module = "androidx.compose.animation:animation-gra
 compose_tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_base" }
 compose_toolingPreview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose_base" }
 compose_activity = { module = "androidx.activity:activity-compose", version.ref = "compose_activity" }
+lifecycleViewmodelCompose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+subsamplingScaleImageView = { module = "com.davemorrissey.labs:subsampling-scale-image-view-androidx", version.ref = "subsamplingScaleImageView" }
 voyager_navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
 voyager_androidx = { module = "cafe.adriel.voyager:voyager-androidx", version.ref = "voyager" }
 

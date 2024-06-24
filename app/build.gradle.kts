@@ -83,7 +83,7 @@ dependencies {
     implementation(libs.compose.material)
     implementation(libs.compose.animationGraphics)
     implementation(libs.compose.toolingPreview)
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation(libs.lifecycleViewmodelCompose)
     debugImplementation(libs.compose.tooling)
     debugImplementation(libs.kotlin.reflect)
 
@@ -92,10 +92,10 @@ dependencies {
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
-    implementation("com.google.firebase:firebase-config-ktx")
-    implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation("com.google.firebase:firebase-config")
+    implementation("com.google.firebase:firebase-messaging")
 
     // Other
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.davemorrissey.labs:subsampling-scale-image-view-androidx:3.10.0")
+    implementation(libs.retrofit)
+    implementation(libs.subsamplingScaleImageView)
 }
