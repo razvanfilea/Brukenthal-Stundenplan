@@ -1,7 +1,6 @@
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 import fetch from "node-fetch";
-// import fetch from "node-fetch";
 import {JSDOM} from 'jsdom';
 
 admin.initializeApp();
@@ -44,10 +43,11 @@ const MESSAGES = [
     "Minim de efort maxim de eficiență",
     "Haide mai bine, să nu",
     "Ani trec robotica rămâne",
-    "No I don't think I will",
     "One does not simply walk into Bruk.",
     "Sunt la școală, scoate-mă de aici!",
     "Let's not get political here",
+    "Es ist wie beim bankkollegen, aber es geht nicht.",
+    "std::cout << \"Orar nou!\" << std::endl;",
     "Looks like they couldn't handle the Bruk style"
 ];
 
@@ -166,7 +166,6 @@ exports.checkForNewTimetable = functions
  * This function is called when the Remote Config is changed
  */
 exports.sendNewTimetableNotification = functions
-    .region('europe-west1')
     .remoteConfig
     .onUpdate(async (versionMetadata) => {
         const config = admin.remoteConfig(); // Get Access to Firebase Remote Config
@@ -204,10 +203,11 @@ exports.sendNewTimetableNotification = functions
                 title: titlePrefix + selectedTitle,
                 body: selectedMessage,
                 channel_id: channel
-            }
+            },
+            condition: "\'all\' in topics"
         };
 
-        return admin.messaging().sendToCondition("\'all\' in topics", payload).then(_ =>
+        return admin.messaging().send(payload).then(_ =>
             console.log("Notification sent")
         ).catch(err => {
             console.error("Notification failed to send");
