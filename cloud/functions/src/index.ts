@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
-import fetch from "node-fetch";
+import fetch from 'node-fetch';
 import {JSDOM} from 'jsdom';
 
 admin.initializeApp();
@@ -166,6 +166,7 @@ exports.checkForNewTimetable = functions
  * This function is called when the Remote Config is changed
  */
 exports.sendNewTimetableNotification = functions
+    .region('europe-west1')
     .remoteConfig
     .onUpdate(async (versionMetadata) => {
         const config = admin.remoteConfig(); // Get Access to Firebase Remote Config
