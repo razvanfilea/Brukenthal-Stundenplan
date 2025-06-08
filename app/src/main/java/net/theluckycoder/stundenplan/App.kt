@@ -5,7 +5,6 @@ import android.util.Log
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
-import net.theluckycoder.stundenplan.utils.UpdateChecker
 
 class App : Application() {
 
@@ -18,9 +17,6 @@ class App : Application() {
 
         Firebase.remoteConfig.also {
             it.setConfigSettingsAsync(configSettings)
-            it.setDefaultsAsync(mapOf(
-                UpdateChecker.KEY_CURRENT_VERSION to BuildConfig.VERSION_CODE,
-            ))
 
             it.fetchAndActivate().addOnCompleteListener { task ->
                 if (task.isSuccessful) {

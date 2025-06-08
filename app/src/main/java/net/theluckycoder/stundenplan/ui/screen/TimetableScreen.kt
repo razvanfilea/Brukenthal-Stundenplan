@@ -108,9 +108,8 @@ class TimetableScreen : Screen {
 @Composable
 private fun HomeContent(
     viewModel: HomeViewModel,
-) = BoxWithConstraints(Modifier.fillMaxSize()) {
+) {
     val snackbarHostState = LocalSnackbarHostState.current
-//    val renderWidth = with(LocalDensity.current) { minOf(maxWidth, maxHeight).roundToPx() }
 
     val networkResult by viewModel.networkStateFlow.collectAsState()
     val isRefreshing = networkResult is NetworkResult.Loading
@@ -162,13 +161,27 @@ private fun HomeContent(
                         setMinimumTileDpi(160)
 
                         setBitmapDecoderFactory { PDFDecoder(0, file, MAX_ZOOM_FACTOR, darkMode) }
-                        setRegionDecoderFactory { PDFRegionDecoder(0, file, MAX_ZOOM_FACTOR, darkMode) }
+                        setRegionDecoderFactory {
+                            PDFRegionDecoder(
+                                0,
+                                file,
+                                MAX_ZOOM_FACTOR,
+                                darkMode
+                            )
+                        }
                         setImage(ImageSource.uri(file.absolutePath))
                     }
                 },
                 update = { view ->
                     view.setBitmapDecoderFactory { PDFDecoder(0, file, MAX_ZOOM_FACTOR, darkMode) }
-                    view.setRegionDecoderFactory { PDFRegionDecoder(0, file, MAX_ZOOM_FACTOR, darkMode) }
+                    view.setRegionDecoderFactory {
+                        PDFRegionDecoder(
+                            0,
+                            file,
+                            MAX_ZOOM_FACTOR,
+                            darkMode
+                        )
+                    }
                     view.setImage(ImageSource.uri(file.absolutePath))
                 }
             )

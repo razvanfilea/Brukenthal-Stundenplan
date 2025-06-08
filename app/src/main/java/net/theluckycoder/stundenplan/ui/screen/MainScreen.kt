@@ -1,7 +1,6 @@
 package net.theluckycoder.stundenplan.ui.screen
 
 import android.content.ActivityNotFoundException
-import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.animation.graphics.res.animatedVectorResource
@@ -26,8 +25,8 @@ import kotlinx.coroutines.launch
 import net.theluckycoder.stundenplan.R
 import net.theluckycoder.stundenplan.extensions.browseUrl
 import net.theluckycoder.stundenplan.ui.LocalSnackbarHostState
-import net.theluckycoder.stundenplan.utils.UpdateChecker
 import net.theluckycoder.stundenplan.viewmodel.HomeViewModel
+import androidx.core.net.toUri
 
 @OptIn(
     ExperimentalMaterialApi::class,
@@ -70,7 +69,7 @@ object MainScreen : Screen {
                                 CustomTabsIntent.Builder()
                                     .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
                                     .build()
-                                    .launchUrl(ctx, Uri.parse(NEWS_URL))
+                                    .launchUrl(ctx, NEWS_URL.toUri())
                             } catch (e: ActivityNotFoundException) {
                                 ctx.browseUrl(NEWS_URL)
                             }
@@ -96,7 +95,7 @@ object MainScreen : Screen {
                         CurrentScreen()
                     }
                 },
-                gesturesEnabled = !(navigator.lastItem is TimetableScreen)
+                gesturesEnabled = navigator.lastItem !is TimetableScreen
             )
 
             val scaffoldTutorial by viewModel.hasFinishedScaffoldTutorialFlow.collectAsState(true)
@@ -107,23 +106,6 @@ object MainScreen : Screen {
                     viewModel.finishedScaffoldTutorial()
                 }
             }
-        }
-
-        val isUpdateNeeded = remember { UpdateChecker.isUpdateNeeded() }
-
-        if (isUpdateNeeded && !viewModel.hasSeenUpdateDialogState.value) {
-            val ctx = LocalContext.current
-
-            UpdateDialog(
-                onDismiss = {
-                    viewModel.hasSeenUpdateDialogState.value = true
-                },
-                onConfirm = {
-                    val versionName = UpdateChecker.getNewVersionUrl()
-                    viewModel.hasSeenUpdateDialogState.value = true
-                    ctx.browseUrl(versionName)
-                }
-            )
         }
     }
 
@@ -177,7 +159,8 @@ object MainScreen : Screen {
                             scaffoldState.conceal()
                     }
                 }) {
-                    val atEnd = if (scaffoldState.isAnimationRunning)
+                    val scaffoldIsAnimating = scaffoldState.targetValue != scaffoldState.currentValue
+                    val atEnd = if (scaffoldIsAnimating)
                         scaffoldState.isConcealed else scaffoldState.isRevealed
 
                     Icon(

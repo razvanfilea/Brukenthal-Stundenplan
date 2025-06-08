@@ -1,15 +1,11 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
-
-    dependencies {
-        classpath(libs.agp)
-        classpath(libs.kotlinGradlePlugin)
-        classpath("com.google.gms:google-services:4.4.2")
-    }
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.kotlinAndroid) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.google.services) apply false
+    id("com.github.ben-manes.versions") version "0.52.0"
 }
 
 allprojects {
@@ -21,15 +17,13 @@ allprojects {
     }
 }
 
-plugins {
-    id("com.github.ben-manes.versions") version "0.51.0"
-}
-
-tasks.named("dependencyUpdates", com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask::class.java).configure {
-    // Only accept stable versions
+tasks.named(
+    "dependencyUpdates",
+    com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask::class.java
+).configure {
     rejectVersionIf {
-        (candidate.version.contains("alpha") && !currentVersion.contains("alpha"))
-                || (candidate.version.contains("beta") && !currentVersion.contains("beta"))
+        (candidate.version.contains("alpha", true) && !currentVersion.contains("alpha", true)) ||
+                (candidate.version.contains("beta", true) && !currentVersion.contains("beta", true))
     }
 }
 

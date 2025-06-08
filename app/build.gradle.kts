@@ -1,9 +1,8 @@
 plugins {
-    id("com.android.application")
-
-    kotlin("android")
-
-    id("com.google.gms.google-services")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -17,9 +16,11 @@ android {
         versionCode = Versions.App.versionCode
         versionName = Versions.App.versionName
 
-        resourceConfigurations += listOf("en", "de", "ro")
-
         addManifestPlaceholders(mapOf("firebaseDisabled" to true))
+    }
+
+    androidResources {
+        localeFilters += listOf("en", "ro")
     }
 
     buildTypes {
@@ -46,10 +47,6 @@ android {
     compileOptions {
         sourceCompatibility = Versions.javaVersion
         targetCompatibility = Versions.javaVersion
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
 
     bundle.language.enableSplit = false
@@ -85,13 +82,12 @@ dependencies {
     implementation(libs.compose.toolingPreview)
     implementation(libs.lifecycleViewmodelCompose)
     debugImplementation(libs.compose.tooling)
-    debugImplementation(libs.kotlin.reflect)
 
     // Voyager
     implementation(libs.voyager.navigator)
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+    implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
     implementation("com.google.firebase:firebase-config")
     implementation("com.google.firebase:firebase-messaging")
 

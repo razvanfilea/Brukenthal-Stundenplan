@@ -14,7 +14,7 @@ class AppPreferences(private val context: Application) {
 
     val darkThemeFlow: Flow<Boolean> = context.appDataStore.data
         .map { preferences ->
-            preferences[DARK_THEME] ?: false
+            preferences[DARK_THEME] == true
         }
 
     suspend fun updateUseDarkTheme(useDarkTheme: Boolean) =
@@ -38,7 +38,7 @@ class AppPreferences(private val context: Application) {
         }
 
     val hasFinishedScaffoldTutorialFlow: Flow<Boolean> = context.appDataStore.data
-        .map { it[TUTORIAL_SCAFFOLD] ?: false }
+        .map { it[TUTORIAL_SCAFFOLD] == true }
 
     suspend fun finishedScaffoldTutorial() = context.appDataStore.edit { it[TUTORIAL_SCAFFOLD] = true }
 

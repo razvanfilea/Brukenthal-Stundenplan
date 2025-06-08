@@ -34,8 +34,6 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -75,7 +74,7 @@ class GradesScreen : Screen {
                 FloatingActionButton(onClick = {
                     viewModel.showCreateSubjectDialog.value = true
                 }) {
-                    Icon(Icons.Default.Add, contentDescription = null)
+                    Icon(painterResource(R.drawable.ic_add), contentDescription = null)
                 }
             },
             floatingActionButtonPosition = FabPosition.Center,
