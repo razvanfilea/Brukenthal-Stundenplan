@@ -4,22 +4,24 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
+import androidx.core.net.toUri
 
 fun Context.isNetworkAvailable(): Boolean {
-    val manager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val activeNetworkInfo = manager.activeNetworkInfo
-    var connected = activeNetworkInfo != null && activeNetworkInfo.isConnected
-    if (!connected) {
-        connected = manager.allNetworkInfo.any { it.isConnected }
-    }
-    return connected
+    val manager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = manager.activeNetwork ?: return false
+    val capabilities = manager.getNetworkCapabilities(network) ?: return false
+    return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH)
 }
 
 fun Context.browseUrl(url: String): Boolean {
     return try {
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(url)
+            data = url.toUri()
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 

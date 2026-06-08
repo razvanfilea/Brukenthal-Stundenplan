@@ -4,9 +4,10 @@ import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.ktx.messaging
+import com.google.firebase.Firebase
+import com.google.firebase.messaging.messaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
@@ -19,7 +20,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.theluckycoder.stundenplan.BuildConfig
-import net.theluckycoder.stundenplan.extensions.app
 import net.theluckycoder.stundenplan.extensions.isNetworkAvailable
 import net.theluckycoder.stundenplan.model.NetworkResult
 import net.theluckycoder.stundenplan.model.TimetableType
@@ -71,7 +71,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     fun refresh() = viewModelScope.launch(Dispatchers.Default) {
         refreshMutex.withLock {
-            val isNetworkAvailable = app.isNetworkAvailable()
+            val isNetworkAvailable = application.isNetworkAvailable()
 
             if (isNetworkAvailable) {
                 downloadTimetable()

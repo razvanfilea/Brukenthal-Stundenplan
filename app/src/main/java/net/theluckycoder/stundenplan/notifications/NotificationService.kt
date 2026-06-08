@@ -7,10 +7,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.Log
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.Firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.firebase.remoteconfig.remoteConfig
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

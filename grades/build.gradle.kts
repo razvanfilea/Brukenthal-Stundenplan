@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.ksp)
 }
 
@@ -22,6 +21,12 @@ android {
     compileOptions {
         sourceCompatibility = Versions.javaVersion
         targetCompatibility = Versions.javaVersion
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        }
     }
 }
 

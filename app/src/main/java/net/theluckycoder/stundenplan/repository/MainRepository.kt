@@ -1,9 +1,9 @@
 package net.theluckycoder.stundenplan.repository
 
 import android.content.Context
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.remoteconfig.ktx.get
-import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.firebase.Firebase
+import com.google.firebase.remoteconfig.get
+import com.google.firebase.remoteconfig.remoteConfig
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import net.theluckycoder.stundenplan.model.Timetable

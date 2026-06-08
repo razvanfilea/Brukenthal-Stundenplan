@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.google.services)
 }
@@ -20,7 +19,7 @@ android {
     }
 
     androidResources {
-        localeFilters += listOf("en", "ro")
+        localeFilters += listOf("en", "ro", "de")
     }
 
     buildTypes {
@@ -47,6 +46,12 @@ android {
     compileOptions {
         sourceCompatibility = Versions.javaVersion
         targetCompatibility = Versions.javaVersion
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        }
     }
 
     bundle.language.enableSplit = false
@@ -87,7 +92,7 @@ dependencies {
     implementation(libs.voyager.navigator)
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
+    implementation(platform("com.google.firebase:firebase-bom:34.14.0"))
     implementation("com.google.firebase:firebase-config")
     implementation("com.google.firebase:firebase-messaging")
 
