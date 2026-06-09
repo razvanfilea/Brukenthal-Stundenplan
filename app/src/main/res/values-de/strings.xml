@@ -35,6 +35,7 @@
     <string name="menu_news">Informationen</string>
     <string name="grades_list">Noten: %s</string>
     <string name="menu_grades">Noten</string>
+    <string name="menu_more">Mehr Optionen</string>
     <string name="grades_delete_title">Möchten Sie %s löschen?</string>
     <string name="grades_delete_desc">"Dieses wird das Fach samt der Noten der beiden Semester löschen. "</string>
     <string name="grades_explanation">Trage deine Noten hier ein, um leichter einen Überblick über deine Noten und Mittelnoten zu behalten.</string>

@@ -17,10 +17,11 @@ import java.io.IOException
  */
 class PDFRegionDecoder
 /**
- * basic constructor for PDFDecoder.
- * @param position:the current position in the pdf
- * @param file: the pdf-file
- * @param scale: the scale factor
+ * Basic constructor for [PDFRegionDecoder].
+ * @param position the current position in the pdf
+ * @param file the pdf-file
+ * @param scale the scale factor
+ * @param darkMode whether to invert colors for dark mode
  */(
     /**
      * the current page position in the pdf

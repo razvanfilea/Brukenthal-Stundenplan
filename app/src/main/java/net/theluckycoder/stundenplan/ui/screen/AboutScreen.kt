@@ -2,23 +2,16 @@ package net.theluckycoder.stundenplan.ui.screen
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.ListItem
-import androidx.compose.material.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,40 +25,71 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
 import net.theluckycoder.stundenplan.BuildConfig
 import net.theluckycoder.stundenplan.R
+import androidx.core.net.toUri
+import androidx.core.graphics.createBitmap
 
-@OptIn(ExperimentalMaterialApi::class)
 class AboutScreen : Screen {
 
     private fun Context.openUrl(url: String) {
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        startActivity(browserIntent)
+        val browserIntent = Intent(Intent.ACTION_VIEW, url.toUri())
+        try {
+            startActivity(browserIntent)
+        } catch (e: Exception) {
+            // Log or show error toast if no browser found
+        }
     }
 
     private fun Context.openEmail(email: String, title: String) {
         val intent = Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("mailto:")
+            data = "mailto:".toUri()
             putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
             putExtra(Intent.EXTRA_SUBJECT, title)
         }
 
-        if (intent.resolveActivity(packageManager) != null) startActivity(intent)
-    }
-
-    @Composable
-    override fun Content() {
-        Column(
-            Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            AppCard()
-            AuthorCard()
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            // Log or show error toast if no email app found
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.current
+
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.menu_about)) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
+                    navigationIcon = {
+                        IconButton(onClick = { navigator?.pop() }) {
+                            Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = null)
+                        }
+                    }
+                )
+            }
+        ) { padding ->
+            Column(
+                Modifier
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                AppCard()
+                AuthorCard()
+            }
+        }
+    }
     @Composable
     private fun Item(
         title: String, summary: String?, iconResId: Int, action: (() -> Unit)? = null
@@ -75,14 +99,13 @@ class AboutScreen : Screen {
         ) else Modifier
         ListItem(
             modifier = mod,
-            text = { Text(title) },
-            secondaryText = if (summary != null) {
+            headlineContent = { Text(title) },
+            supportingContent = if (summary != null) {
                 { Text(summary) }
             } else null,
-            icon = {
+            leadingContent = {
                 Icon(
                     painterResource(iconResId),
-                    modifier = Modifier.fillMaxHeight(),
                     contentDescription = null
                 )
             }
@@ -110,16 +133,12 @@ class AboutScreen : Screen {
         val ctx = LocalContext.current
 
         ListItem(
-            text = { Text(stringResource(R.string.app_name)) },
-            icon = {
+            headlineContent = { Text(stringResource(R.string.app_name)) },
+            leadingContent = {
                 ResourcesCompat.getDrawable(
                     LocalContext.current.resources, R.mipmap.ic_launcher, LocalContext.current.theme
                 )?.let { drawable ->
-                    val bitmap = Bitmap.createBitmap(
-                        drawable.intrinsicWidth,
-                        drawable.intrinsicHeight,
-                        Bitmap.Config.ARGB_8888,
-                    )
+                    val bitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight)
                     val canvas = Canvas(bitmap)
                     drawable.setBounds(0, 0, canvas.width, canvas.height)
                     drawable.draw(canvas)

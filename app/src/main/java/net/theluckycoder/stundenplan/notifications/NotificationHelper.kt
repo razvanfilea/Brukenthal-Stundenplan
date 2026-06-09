@@ -13,7 +13,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import net.theluckycoder.stundenplan.R
-import net.theluckycoder.stundenplan.ui.AppColors
+import net.theluckycoder.stundenplan.ui.primaryAppColor
 
 object NotificationHelper {
 
@@ -70,7 +70,7 @@ object NotificationHelper {
             .setContentTitle(title)
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_notification)
-            .setColor(AppColors.Primary.toArgb())
+            .setColor(primaryAppColor.toArgb())
             .setContentIntent(pendingIntent)
             .setSound(defaultSoundUri)
             .setAutoCancel(true)

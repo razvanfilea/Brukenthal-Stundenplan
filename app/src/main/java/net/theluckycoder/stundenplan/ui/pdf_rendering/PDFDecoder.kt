@@ -47,11 +47,11 @@ class PDFDecoder(
             Bitmap.Config.ARGB_8888
         )
 
+        page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+
         if (darkMode) {
             bitmap.inversePixelColors()
         }
-
-        page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
         page.close()
         renderer.close()
         descriptor.close()

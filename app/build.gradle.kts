@@ -80,9 +80,10 @@ dependencies {
     implementation(libs.androidX.browser)
 
     // Compose
+    implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.foundation)
-    implementation(libs.compose.material)
+    implementation(libs.compose.material3)
     implementation(libs.compose.animationGraphics)
     implementation(libs.compose.toolingPreview)
     implementation(libs.lifecycleViewmodelCompose)
@@ -92,9 +93,9 @@ dependencies {
     implementation(libs.voyager.navigator)
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:34.14.0"))
-    implementation("com.google.firebase:firebase-config")
-    implementation("com.google.firebase:firebase-messaging")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.config)
+    implementation(libs.firebase.messaging)
 
     // Other
     implementation(libs.retrofit)

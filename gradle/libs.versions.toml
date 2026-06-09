@@ -1,15 +1,15 @@
 [versions]
 agp = "9.2.1"
-kotlin_base = "2.3.20"
+kotlin_base = "2.4.0"
 kotlin_ksp = "2.3.9"
 kotlin_coroutines = "1.11.0"
-compose_base = "1.11.2"
-compose_material3 = "1.4.0"
+compose_bom = "2026.05.01"
 lifecycleViewmodelCompose = "2.11.0-rc01"
 retrofit = "3.0.0"
 subsamplingScaleImageView = "3.10.0"
 voyager = "2.2.21-1.10.3"
 google_services = "4.4.4"
+firebase_bom = "34.14.1"
 
 androidx_room = "2.8.4"
 androidx_activity = "1.13.0"
@@ -33,18 +33,22 @@ androidX_dataStore = { module = "androidx.datastore:datastore-preferences", vers
 androidX_splash = { module = "androidx.core:core-splashscreen", version.ref = "androidx_splash" }
 androidX_browser = { module = "androidx.browser:browser", version.ref = "androidx_browser" }
 
-compose_foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_base" }
-compose_ui = { module = "androidx.compose.ui:ui", version.ref = "compose_base" }
-compose_material = { module = "androidx.compose.material:material", version.ref = "compose_base" }
-compose_material3 = { module = "androidx.compose.material3:material3", version.ref = "compose_material3" }
-compose_animationGraphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_base" }
-compose_tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_base" }
-compose_toolingPreview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose_base" }
+compose_bom = { module = "androidx.compose:compose-bom", version.ref = "compose_bom" }
+compose_foundation = { module = "androidx.compose.foundation:foundation" }
+compose_ui = { module = "androidx.compose.ui:ui" }
+compose_material3 = { module = "androidx.compose.material3:material3" }
+compose_animationGraphics = { module = "androidx.compose.animation:animation-graphics" }
+compose_tooling = { module = "androidx.compose.ui:ui-tooling" }
+compose_toolingPreview = { module = "androidx.compose.ui:ui-tooling-preview" }
 lifecycleViewmodelCompose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 subsamplingScaleImageView = { module = "com.davemorrissey.labs:subsampling-scale-image-view-androidx", version.ref = "subsamplingScaleImageView" }
 voyager_navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
+
+firebase_bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase_bom" }
+firebase_config = { module = "com.google.firebase:firebase-config" }
+firebase_messaging = { module = "com.google.firebase:firebase-messaging" }
 
 room_runtime = { module = "androidx.room:room-runtime", version.ref = "androidx_room" }
 room_compiler = { module = "androidx.room:room-compiler", version.ref = "androidx_room" }

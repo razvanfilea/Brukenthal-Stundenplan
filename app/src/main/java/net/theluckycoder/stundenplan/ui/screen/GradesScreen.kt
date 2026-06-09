@@ -6,42 +6,15 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Card
-import androidx.compose.material.FabPosition
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -78,7 +51,6 @@ class GradesScreen : Screen {
                 }
             },
             floatingActionButtonPosition = FabPosition.Center,
-            isFloatingActionButtonDocked = true,
             topBar = { TopBar(totalAverage) },
         ) { contentPadding ->
             Box(Modifier.padding(contentPadding)) {
@@ -88,12 +60,11 @@ class GradesScreen : Screen {
                 if (subjects.isEmpty()) {
                     Card(
                         Modifier.padding(8.dp),
-                        elevation = 4.dp,
                     ) {
                         Column(Modifier.padding(16.dp)) {
                             Text(
                                 stringResource(R.string.grades_explanation_title),
-                                style = MaterialTheme.typography.h6
+                                style = MaterialTheme.typography.titleLarge
                             )
                             Spacer(Modifier.height(2.dp))
                             Text(stringResource(R.string.grades_explanation))
@@ -143,15 +114,21 @@ class GradesScreen : Screen {
         Row(
             Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colors.surface)
+                .background(MaterialTheme.colorScheme.primary)
                 .padding(16.dp),
         ) {
-            Text(stringResource(R.string.grades_average))
+            Text(
+                text = stringResource(R.string.grades_average),
+                color = MaterialTheme.colorScheme.onPrimary
+            )
 
             Spacer(Modifier.width(2.dp))
 
             VerticallyAnimatedNumber(targetState = totalAverage) { target ->
-                Text(target.toString())
+                Text(
+                    text = target.toString(),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
         }
     }
@@ -174,7 +151,6 @@ class GradesScreen : Screen {
             items(subjects, key = { it.id }) {
                 Card(
                     Modifier.padding(8.dp),
-                    elevation = 4.dp,
                 ) {
                     Box(
                         Modifier.combinedClickable(
@@ -294,14 +270,14 @@ class GradesScreen : Screen {
                 imeAction = ImeAction.Next
             )
 
-            Surface(Modifier.padding(8.dp), shape = RoundedCornerShape(6.dp)) {
+            Surface(Modifier.padding(8.dp), shape = RoundedCornerShape(12.dp)) {
                 Column(Modifier.padding(8.dp)) {
 
                     Spacer(Modifier.height(8.dp))
 
                     Text(
                         subject.name,
-                        style = MaterialTheme.typography.h5,
+                        style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
                     )
 

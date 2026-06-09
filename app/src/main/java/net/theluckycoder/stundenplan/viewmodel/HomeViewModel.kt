@@ -39,17 +39,14 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     val networkStateFlow = _networkStateFlow.asStateFlow()
 
     val darkThemeFlow = preferences.darkThemeFlow
-    val hasFinishedScaffoldTutorialFlow = preferences.hasFinishedScaffoldTutorialFlow
 
-    val hasSeenUpdateDialogState = mutableStateOf(false)
-    val showAppBarState = mutableStateOf(true)
-
-    val timetableFile = timetableStateFlow
-        .combine(networkStateFlow) { file, _ ->
-            file
-        }.map {
-            repository.getLastFile(it)
-        }
+    val timetableFile = combine(
+        timetableStateFlow,
+        darkThemeFlow,
+        networkStateFlow
+    ) { type, dark, _ ->
+        repository.getLastFile(type) to dark
+    }
 
     // region Mutexes
 
@@ -93,12 +90,6 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
         viewModelScope.launch(Dispatchers.IO) {
             preferences.updateTimetableType(newTimetableType)
-        }
-    }
-
-    fun finishedScaffoldTutorial() {
-        viewModelScope.launch(Dispatchers.IO) {
-            preferences.finishedScaffoldTutorial()
         }
     }
 
