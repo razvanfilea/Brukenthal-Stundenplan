@@ -1,5 +1,7 @@
 import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
+import * as https from 'node:https';
+import * as zlib from 'node:zlib';
 
 admin.initializeApp();
 
@@ -35,25 +37,34 @@ const TITLES = [
     "Ein neuer Stundenplan wurde hochgeladen."
 ];
 const MESSAGES = [
-    "Some people call this junk. Me? I call it treasure",
-    "Geschwindigkeit und Präzision!",
+    "Some people call this junk. Me? I call it treasure 💎",
+    "Geschwindigkeit und Präzision! ⚡",
     "The risk I took was calculated but man am I bad at math",
-    "Minim de efort maxim de eficiență",
+    "Minim de efort maxim de eficiență 🧠",
     "Haide mai bine, să nu",
-    "Ani trec robotica rămâne",
-    "One does not simply walk into Bruk.",
-    "Sunt la școală, scoate-mă de aici!",
-    "Let's not get political here",
-    "Es ist wie beim bankkollegen, aber es geht nicht.",
+    "Ani trec robotica rămâne 🤖",
+    "One does not simply walk into Bruk",
+    "Es ist wie beim Bankkollegen, aber es geht nicht!",
     "std::cout << \"Orar nou!\" << std::endl;",
-    "Looks like they couldn't handle the Bruk style"
+    "Looks like they couldn't handle the Bruk style 😎",
+    "ChatGPT 6.7 just dropped",
+    "We got new timetable before GTA 6",
+    "Chat, is this timetable cooked? 🔥",
+    "-1000 Aura dacă întârzii la prima oră",
+    "W sau L de orar? 🤔",
+    "S-a schimbat orarul, no cap 🧢",
+    "Level 10 Bruk rizz 🗿",
+    "Die Pause ist die wichtigste Stunde des Tages ☕",
+    "I'm tired, boss... 🪫",
+    "Keine Panik, e doar un update de orar 🧘",
+    "We are so back!",
+    "It's so over... 💀",
+    "Skill issue dacă nu-ți convine orarul",
+    "Dormi liniștit, orarul se mai schimbă oricum mâine 😴🤣"
 ];
 
 /// Structures
 
-/**
- * A small immutable class used for convenience to store the links to the timetables
- */
 class ConfigValues {
     readonly highSchool: string
     readonly middleSchool: string
@@ -66,9 +77,6 @@ class ConfigValues {
 
 /// Helper Functions
 
-/**
- * Self explanatory, generate a random integer between [min] and [max]
- */
 function randomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -123,25 +131,56 @@ async function updateRemoteConfig(newConfigValues: ConfigValues): Promise<void> 
 }
 
 /**
+ * Makes an HTTPS GET request with support for redirects, gzip compression, and custom timeout
+ */
+function httpsGet(url: string, timeoutMs: number): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const req = https.get(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'ro-RO,ro;q=0.9,en-US;q=0.8,en;q=0.7'
+            },
+            timeout: timeoutMs
+        }, (res) => {
+            // Handle redirects
+            if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                return httpsGet(res.headers.location, timeoutMs).then(resolve, reject);
+            }
+            if (res.statusCode !== 200) {
+                return reject(new Error(`HTTP ${res.statusCode}`));
+            }
+
+            let stream: NodeJS.ReadableStream = res;
+            const encoding = res.headers['content-encoding'];
+            if (encoding === 'gzip') {
+                stream = res.pipe(zlib.createGunzip());
+            } else if (encoding === 'deflate') {
+                stream = res.pipe(zlib.createInflate());
+            }
+
+            let data = '';
+            stream.setEncoding('utf8');
+            stream.on('data', chunk => { data += chunk; });
+            stream.on('end', () => resolve(data));
+            stream.on('error', reject);
+        });
+
+        req.on('timeout', () => {
+            req.destroy(new Error(`Connection/Request timeout after ${timeoutMs}ms`));
+        });
+        req.on('error', reject);
+    });
+}
+
+/**
  * Fetches HTML from the school website with a browser User-Agent and retry logic
  */
 async function fetchTimetableHtml(): Promise<string | null> {
     for (let attempt = 1; attempt <= 2; attempt++) {
         try {
-            const response = await fetch(SITE_URL, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Accept-Language': 'ro-RO,ro;q=0.9,en-US;q=0.8,en;q=0.7'
-                },
-                signal: AbortSignal.timeout(15000)
-            });
-
-            if (response.ok) {
-                return await response.text();
-            }
-            console.warn(`Attempt ${attempt}: ${SITE_URL} returned HTTP ${response.status} ${response.statusText}`);
+            return await httpsGet(SITE_URL, 30000);
         } catch (err) {
             console.warn(`Attempt ${attempt} to fetch ${SITE_URL} failed:`, err);
         }
@@ -159,8 +198,8 @@ async function fetchTimetableHtml(): Promise<string | null> {
  * Register the Scheduled Cloud Function
  */
 exports.checkForNewTimetable = functions
-    .region('europe-west1')
-    .runWith({ memory: '512MB' })
+    .region('europe-central2')
+    .runWith({ memory: '512MB', timeoutSeconds: 120 })
     .pubsub
     .schedule('every 50 minutes')
     .onRun(async () => {
@@ -216,7 +255,7 @@ exports.checkForNewTimetable = functions
  * This function is called when the Remote Config is changed
  */
 exports.sendNewTimetableNotification = functions
-    .region('europe-west1')
+    .region('europe-central2')
     .remoteConfig
     .onUpdate(async (versionMetadata) => {
         const config = admin.remoteConfig(); // Get Access to Firebase Remote Config
