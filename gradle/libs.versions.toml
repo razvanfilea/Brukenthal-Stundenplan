@@ -9,7 +9,7 @@ retrofit = "3.0.0"
 subsamplingScaleImageView = "3.10.0"
 voyager = "2.2.21-1.10.3"
 google_services = "4.4.4"
-firebase_bom = "34.14.1"
+firebase_bom = "35.0.0"
 
 androidx_room = "2.8.4"
 androidx_activity = "1.13.0"
